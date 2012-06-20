@@ -15,7 +15,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 public class WeatherMonitorActivity extends Activity {
-	/** Called when the activity is first created. */
 
 	public DataDownloader dataDownloader;
 	EditText editTextLocation;
