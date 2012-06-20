@@ -1,0 +1,7 @@
+ToDo
+
+1.	if connection cannot be established display toast.
+2.	investigate persistence so that entered postcode can be retained and used as default, last typed pc is default.
+3.  if pc is invalid notify user.
+4.	look into obtaining location automatically.
+	
