@@ -1,85 +1,77 @@
 package com.dshalom.weathermonitor;
 
+import java.util.ArrayList;
+import java.util.List;
 import com.dshalom.weathermonitor.DataDownloader;
-
-import android.app.Activity;
+import android.app.ListActivity;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.view.View;
 import android.view.Window;
 import android.widget.EditText;
-import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-public class WeatherMonitorActivity extends Activity {
+public class WeatherMonitorActivity extends ListActivity {
 
-	public DataDownloader dataDownloader;
+    DataDownloader dataDownloader;
 	EditText editTextLocation;
 	TextView textViewLocation, textViewLocationType;
 	final String centigrade = "CENTIGRADE";
 	final String postcode = "POSTCODE";
 	boolean bCentigrade, bPostCode;
-
-	TextView[] textViewDateArray = new TextView[3];
-	TextView[] textViewDayHighArray = new TextView[3];
-	TextView[] textViewDayLowArray = new TextView[3];
-	ImageView[] imageViewArray = new ImageView[3];
-
-	ImageView imageViewdat1, imageViewdat2, imageViewdat3;
+	ArrayList<WeatherData>weatherDataList;
+	WeatherAdapter adapter;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		this.requestWindowFeature(Window.FEATURE_NO_TITLE);
-		setContentView(R.layout.main);
+		weatherDataList = new ArrayList<WeatherData>();
 
-		textViewDateArray[0] = (TextView) findViewById(R.id.textViewDay1Date);
-		textViewDateArray[1] = (TextView) findViewById(R.id.textViewDay2Date);
-		textViewDateArray[2] = (TextView) findViewById(R.id.textViewDay3Date);
+		adapter = new WeatherAdapter(this, R.layout.row,weatherDataList);
 
-		textViewDayHighArray[0] = (TextView) findViewById(R.id.textViewDay1High);
-		textViewDayHighArray[1] = (TextView) findViewById(R.id.textViewDay2High);
-		textViewDayHighArray[2] = (TextView) findViewById(R.id.textViewDay3High);
 
-		textViewDayLowArray[0] = (TextView) findViewById(R.id.textViewDay1Low);
-		textViewDayLowArray[1] = (TextView) findViewById(R.id.textViewDay2Low);
-		textViewDayLowArray[2] = (TextView) findViewById(R.id.textViewDay3Low);
+		View header = (View) getLayoutInflater().inflate(
+				R.layout.listview_header_row, null);
 
-		imageViewArray[0] = (ImageView) findViewById(R.id.imageViewDay1);
-		imageViewArray[1] = (ImageView) findViewById(R.id.imageViewDay2);
-		imageViewArray[2] = (ImageView) findViewById(R.id.imageViewDay3);
+		getListView().addHeaderView(header);
+		getListView().setBackgroundResource(R.drawable.background1);
+		
+		setListAdapter(adapter);
 
-		editTextLocation = (EditText) findViewById(R.id.editTextLocation);
-		textViewLocation = (TextView) findViewById(R.id.textViewLocation);
-
-		textViewLocationType = (TextView) findViewById(R.id.textViewLocationType);
-
-		// ////get the location type and set
-		SharedPreferences preferences = PreferenceManager
-				.getDefaultSharedPreferences(getBaseContext());
-		bCentigrade = preferences.getBoolean(centigrade, false);
-		bPostCode = preferences.getBoolean(postcode, false);
-
-		if (bPostCode) {
-			textViewLocationType.setText("Enter Postcode");
-			editTextLocation.setText(preferences.getString("postcode", "SW11"));
-
-		} else {
-			textViewLocationType.setText("Enter City");
-			editTextLocation.setText(preferences.getString("city", "London"));
-		}
+//		editTextLocation = (EditText) findViewById(R.id.editTextLocation);
+//		textViewLocation = (TextView) findViewById(R.id.textViewLocation);
+//
+//		textViewLocationType = (TextView) findViewById(R.id.textViewLocationType);
+//
+//		// ////get the location type and set
+//		SharedPreferences preferences = PreferenceManager
+//				.getDefaultSharedPreferences(getBaseContext());
+//		bCentigrade = preferences.getBoolean(centigrade, false);
+//		bPostCode = preferences.getBoolean(postcode, false);
+//
+//		if (bPostCode) {
+//			textViewLocationType.setText("Enter Postcode");
+//			editTextLocation.setText(preferences.getString("postcode", "SW11"));
+//
+//		} else {
+//			textViewLocationType.setText("Enter City");
+//			editTextLocation.setText(preferences.getString("city", "London"));
+//		}
 
 		// make the request
 		dataDownloader = new DataDownloader(this);
 		if (bCentigrade) {
 			dataDownloader.execute(new String[] {
-					editTextLocation.getText().toString(), "cent" });
+					"London", "cent" });
 		} else {
 			dataDownloader.execute(new String[] {
-					editTextLocation.getText().toString(), "fari" });
+				//	editTextLocation.getText().toString(), "fari" });
+					"London", "cent" });
 		}
 
 	}
@@ -88,7 +80,7 @@ public class WeatherMonitorActivity extends Activity {
 
 		SharedPreferences preferences = PreferenceManager
 				.getDefaultSharedPreferences(getBaseContext());
-	
+
 		SharedPreferences.Editor editor = preferences.edit();
 		editor.putString("city", editTextLocation.getText().toString());
 		editor.commit();
@@ -166,4 +158,6 @@ public class WeatherMonitorActivity extends Activity {
 		}
 
 	}
+
+	
 }

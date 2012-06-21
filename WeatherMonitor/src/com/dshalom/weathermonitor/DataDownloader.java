@@ -32,7 +32,6 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 
-
 enum ErrorCodes {
 	NOERROR, POSTCODEERROR, CONNECTIONERROR, OTHERERROR
 };
@@ -210,40 +209,49 @@ public class DataDownloader extends AsyncTask<String, Void, ErrorCodes> {
 		}
 
 		super.onPostExecute(result);
-		parent.textViewLocation.setText(location);
+	//	parent.textViewLocation.setText(location);
 		updateTemps(tempUnit);
 	}
 
 	public void updateTemps(String unit) {
+
 		// update unit, depends on unit
 		if (unit == "cent") {
 			for (int i = 0; i < nl.getLength(); i++) {
 				Element e = (Element) nl.item(i);
 
-				parent.textViewDateArray[i].setText(GetDayOfWeek(parser
-						.getValue(e, KEY_DATE)));
+				// parent.textViewDateArray[i].setText(GetDayOfWeek(parser
+				// .getValue(e, KEY_DATE)));
+				//
+				// parent.textViewDayHighArray[i].setText(parser.getValue(e,
+				// KEY_MAXTEMPC) + "°C");
+				// parent.textViewDayLowArray[i].setText(parser.getValue(e,
+				// KEY_MINTEMPC) + "°C");
+				//
+				// parent.imageViewArray[i].setImageBitmap(bitmaps[i]);
 
-				parent.textViewDayHighArray[i].setText(parser.getValue(e,
-						KEY_MAXTEMPC) + "°C");
-				parent.textViewDayLowArray[i].setText(parser.getValue(e,
-						KEY_MINTEMPC) + "°C");
+				WeatherData weatherData = new WeatherData(
+						GetDayOfWeek(parser.getValue(e, KEY_DATE)), bitmaps[i],
+						parser.getValue(e, KEY_MINTEMPC) + "°C",
+						parser.getValue(e, KEY_MAXTEMPC) + "°C");
+				
+				parent.adapter.add(weatherData);
 
-				parent.imageViewArray[i].setImageBitmap(bitmaps[i]);
 			}
 
 		} else {
 			for (int i = 0; i < nl.getLength(); i++) {
 				Element e = (Element) nl.item(i);
 
-				parent.textViewDateArray[i].setText(GetDayOfWeek(parser
-						.getValue(e, KEY_DATE)));
-
-				parent.textViewDayHighArray[i].setText(parser.getValue(e,
-						KEY_MAXTEMPF) + "°F");
-				parent.textViewDayLowArray[i].setText(parser.getValue(e,
-						KEY_MINTEMPF) + "°F");
-
-				parent.imageViewArray[i].setImageBitmap(bitmaps[i]);
+				// parent.textViewDateArray[i].setText(GetDayOfWeek(parser
+				// .getValue(e, KEY_DATE)));
+				//
+				// parent.textViewDayHighArray[i].setText(parser.getValue(e,
+				// KEY_MAXTEMPF) + "°F");
+				// parent.textViewDayLowArray[i].setText(parser.getValue(e,
+				// KEY_MINTEMPF) + "°F");
+				//
+				// parent.imageViewArray[i].setImageBitmap(bitmaps[i]);
 			}
 		}
 
