@@ -3,5 +3,6 @@
 
     <string name="hello">Hello World, WeatherMonitorActivity!</string>
     <string name="app_name">WeatherMonitor</string>
+    <string name="weather_outlook">Weather Outlook</string>
 
 </resources>

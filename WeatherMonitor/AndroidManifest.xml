@@ -17,15 +17,19 @@
             android:name=".WeatherMonitorActivity"
             android:label="@string/app_name"
             android:screenOrientation="portrait" >
+        </activity>
+        <activity
+            android:name=".ConfigActivity"
+            android:label="Configuration" >
+        </activity>
+        <activity
+            android:name=".Wethmonact2"
+            android:label="@string/app_name" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-        </activity>
-        <activity
-            android:name=".ConfigActivity"
-            android:label="Configuration" >
         </activity>
     </application>
 
