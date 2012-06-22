@@ -10,6 +10,7 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -31,6 +32,8 @@ import org.w3c.dom.NodeList;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 
 enum ErrorCodes {
 	NOERROR, POSTCODEERROR, CONNECTIONERROR, OTHERERROR
@@ -39,6 +42,7 @@ enum ErrorCodes {
 public class DataDownloader extends AsyncTask<String, Void, ErrorCodes> {
 	WeatherMonitorActivity parent;
 	String xml;
+	final static int NUMBEROFDAYS = 4;
 	XMLParser parser;
 	final String REQUEST_ITEM = "request";
 	final String LOCATION_ITEM = "query";
@@ -52,7 +56,7 @@ public class DataDownloader extends AsyncTask<String, Void, ErrorCodes> {
 	String tempUnit;
 	String location;
 	NodeList nl;
-	Bitmap[] bitmaps = new Bitmap[3];
+	Bitmap[] bitmaps = new Bitmap[NUMBEROFDAYS];
 
 	ErrorCodes error;
 
@@ -68,6 +72,7 @@ public class DataDownloader extends AsyncTask<String, Void, ErrorCodes> {
 		String loc = params[0];
 		tempUnit = params[1];
 		String xml = null;
+		//make request
 		try {
 			xml = makeRequest(loc);
 		} catch (URISyntaxException e) {
@@ -89,7 +94,7 @@ public class DataDownloader extends AsyncTask<String, Void, ErrorCodes> {
 		factory.setCoalescing(true);
 		Document doc = parser.getDomElement(xml.toString());
 
-		// get the city details
+		// get the city or postcode details details
 		nl = doc.getElementsByTagName(REQUEST_ITEM);
 		if (nl.getLength() == 0) {
 			return ErrorCodes.POSTCODEERROR;
@@ -97,15 +102,19 @@ public class DataDownloader extends AsyncTask<String, Void, ErrorCodes> {
 		Element requestElement = (Element) nl.item(0);
 		location = parser.getValue(requestElement, LOCATION_ITEM);
 
+		
+		//start of daily report
 		nl = doc.getElementsByTagName(KEY_ITEM);
 
 		if (nl.getLength() == 0) {
 			return ErrorCodes.POSTCODEERROR;
 		}
-
+		//should be 5 days reported 
 		for (int i = 0; i < nl.getLength(); i++) {
 			Element e = (Element) nl.item(i);
 
+			//pare bitmap info and fetch
+			//the rest of the information is collected in onPostExecute
 			String icon = parser.getValue(e, KEY_ICON);
 			URL url = null;
 			try {
@@ -138,7 +147,7 @@ public class DataDownloader extends AsyncTask<String, Void, ErrorCodes> {
 		List<NameValuePair> qparams = new ArrayList<NameValuePair>();
 		qparams.add(new BasicNameValuePair("key", "6ffa3d38e9115055122204"));
 		qparams.add(new BasicNameValuePair("q", loc));
-		qparams.add(new BasicNameValuePair("num_of_days", "3"));
+		qparams.add(new BasicNameValuePair("num_of_days", String.valueOf(NUMBEROFDAYS)));
 		qparams.add(new BasicNameValuePair("format", "xml"));
 		URI uri = null;
 
@@ -209,7 +218,8 @@ public class DataDownloader extends AsyncTask<String, Void, ErrorCodes> {
 		}
 
 		super.onPostExecute(result);
-	//	parent.textViewLocation.setText(location);
+		parent.textViewLocation.setText(location);
+		parent.adapter.clear();
 		updateTemps(tempUnit);
 	}
 
@@ -219,16 +229,6 @@ public class DataDownloader extends AsyncTask<String, Void, ErrorCodes> {
 		if (unit == "cent") {
 			for (int i = 0; i < nl.getLength(); i++) {
 				Element e = (Element) nl.item(i);
-
-				// parent.textViewDateArray[i].setText(GetDayOfWeek(parser
-				// .getValue(e, KEY_DATE)));
-				//
-				// parent.textViewDayHighArray[i].setText(parser.getValue(e,
-				// KEY_MAXTEMPC) + "°C");
-				// parent.textViewDayLowArray[i].setText(parser.getValue(e,
-				// KEY_MINTEMPC) + "°C");
-				//
-				// parent.imageViewArray[i].setImageBitmap(bitmaps[i]);
 
 				WeatherData weatherData = new WeatherData(
 						GetDayOfWeek(parser.getValue(e, KEY_DATE)), bitmaps[i],
@@ -242,18 +242,13 @@ public class DataDownloader extends AsyncTask<String, Void, ErrorCodes> {
 		} else {
 			for (int i = 0; i < nl.getLength(); i++) {
 				Element e = (Element) nl.item(i);
-
-				// parent.textViewDateArray[i].setText(GetDayOfWeek(parser
-				// .getValue(e, KEY_DATE)));
-				//
-				// parent.textViewDayHighArray[i].setText(parser.getValue(e,
-				// KEY_MAXTEMPF) + "°F");
-				// parent.textViewDayLowArray[i].setText(parser.getValue(e,
-				// KEY_MINTEMPF) + "°F");
-				//
-				// parent.imageViewArray[i].setImageBitmap(bitmaps[i]);
 			}
-		}
+		}	
+		String lastRefresh = "Updated: ";
+		lastRefresh += DateFormat.getDateInstance().format(new Date());
+		DateFormat dateFormat = new SimpleDateFormat("HH:mm a");
+		lastRefresh+= " " + dateFormat.format(new Date());
+		parent.textViewLastRefresh.setText(lastRefresh);
 
 	}
 

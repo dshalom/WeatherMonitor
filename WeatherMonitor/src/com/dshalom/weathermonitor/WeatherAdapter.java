@@ -28,9 +28,9 @@ public class WeatherAdapter extends ArrayAdapter<WeatherData> {
 		}
 
 	@Override
-	public View getView(int position, View convertView, ViewGroup parent) {
+	public View getView(int position, View row, ViewGroup parent) {
 
-		View row = convertView;
+	//	View row = convertView;
 		WeatherHolder holder = null;
 		Log.d(TAG, "getView position = " + position);
 

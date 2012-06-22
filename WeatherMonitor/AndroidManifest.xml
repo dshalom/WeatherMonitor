@@ -27,6 +27,7 @@
             android:name=".ConfigActivity"
             android:label="Configuration" >
         </activity>
+        <activity android:name=".PrefsActivity"></activity>
     </application>
 
 </manifest>

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="stringArrayTemeratureUnits">
+        <item >Centigrade</item>
+        <item >Fahrenheit</item>
+    </string-array>
+    
+    <string-array name="stringArrayTemeratureValues">
+        <item >Centigrade</item>
+        <item >Fahrenheit</item>
+    </string-array>
+    
+</resources>

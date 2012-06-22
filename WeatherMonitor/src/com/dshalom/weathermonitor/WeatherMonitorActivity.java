@@ -1,14 +1,14 @@
 package com.dshalom.weathermonitor;
 
 import java.util.ArrayList;
-import java.util.List;
 import com.dshalom.weathermonitor.DataDownloader;
 import android.app.ListActivity;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
 import android.widget.EditText;
@@ -17,14 +17,15 @@ import android.widget.Toast;
 
 public class WeatherMonitorActivity extends ListActivity {
 
-    DataDownloader dataDownloader;
+	DataDownloader dataDownloader;
 	EditText editTextLocation;
-	TextView textViewLocation, textViewLocationType;
+	TextView textViewLocation, textViewLocationType, textViewLastRefresh;
 	final String centigrade = "CENTIGRADE";
 	final String postcode = "POSTCODE";
 	boolean bCentigrade, bPostCode;
-	ArrayList<WeatherData>weatherDataList;
+	ArrayList<WeatherData> weatherDataList;
 	WeatherAdapter adapter;
+	long lastUpdate;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -32,45 +33,56 @@ public class WeatherMonitorActivity extends ListActivity {
 		this.requestWindowFeature(Window.FEATURE_NO_TITLE);
 		weatherDataList = new ArrayList<WeatherData>();
 
-		adapter = new WeatherAdapter(this, R.layout.row,weatherDataList);
-
+		adapter = new WeatherAdapter(this, R.layout.row, weatherDataList);
 
 		View header = (View) getLayoutInflater().inflate(
 				R.layout.listview_header_row, null);
 
 		getListView().addHeaderView(header);
-		getListView().setBackgroundResource(R.drawable.background1);
-		
+		getListView().setBackgroundResource(R.drawable.sunnydaywinter);
+
+		View footerMsg = (View) getLayoutInflater().inflate(
+				R.layout.footerlastrefresh, null);
+
+		View footerButton = (View) getLayoutInflater().inflate(
+				R.layout.footerrefreshbutton, null);
+
+		getListView().addFooterView(footerMsg);
+		getListView().addFooterView(footerButton);
+
 		setListAdapter(adapter);
 
-//		editTextLocation = (EditText) findViewById(R.id.editTextLocation);
-//		textViewLocation = (TextView) findViewById(R.id.textViewLocation);
-//
-//		textViewLocationType = (TextView) findViewById(R.id.textViewLocationType);
-//
-//		// ////get the location type and set
-//		SharedPreferences preferences = PreferenceManager
-//				.getDefaultSharedPreferences(getBaseContext());
-//		bCentigrade = preferences.getBoolean(centigrade, false);
-//		bPostCode = preferences.getBoolean(postcode, false);
-//
-//		if (bPostCode) {
-//			textViewLocationType.setText("Enter Postcode");
-//			editTextLocation.setText(preferences.getString("postcode", "SW11"));
-//
-//		} else {
-//			textViewLocationType.setText("Enter City");
-//			editTextLocation.setText(preferences.getString("city", "London"));
-//		}
+		textViewLocation = (TextView) findViewById(R.id.txtHeaderLocation);
+		textViewLastRefresh = (TextView) findViewById(R.id.textViewLastRefresh);
+
+		// editTextLocation = (EditText) findViewById(R.id.editTextLocation);
+		// textViewLocation = (TextView) findViewById(R.id.textViewLocation);
+		//
+		// textViewLocationType = (TextView)
+		// findViewById(R.id.textViewLocationType);
+		//
+		// // ////get the location type and set
+		// SharedPreferences preferences = PreferenceManager
+		// .getDefaultSharedPreferences(getBaseContext());
+		// bCentigrade = preferences.getBoolean(centigrade, false);
+		// bPostCode = preferences.getBoolean(postcode, false);
+		//
+		// if (bPostCode) {
+		// textViewLocationType.setText("Enter Postcode");
+		// editTextLocation.setText(preferences.getString("postcode", "SW11"));
+		//
+		// } else {
+		// textViewLocationType.setText("Enter City");
+		// editTextLocation.setText(preferences.getString("city", "London"));
+		// }
 
 		// make the request
 		dataDownloader = new DataDownloader(this);
 		if (bCentigrade) {
-			dataDownloader.execute(new String[] {
-					"London", "cent" });
+			dataDownloader.execute(new String[] { "London", "cent" });
 		} else {
 			dataDownloader.execute(new String[] {
-				//	editTextLocation.getText().toString(), "fari" });
+					// editTextLocation.getText().toString(), "fari" });
 					"London", "cent" });
 		}
 
@@ -78,20 +90,21 @@ public class WeatherMonitorActivity extends ListActivity {
 
 	public void onGoClick(View v) {
 
-		SharedPreferences preferences = PreferenceManager
-				.getDefaultSharedPreferences(getBaseContext());
-
-		SharedPreferences.Editor editor = preferences.edit();
-		editor.putString("city", editTextLocation.getText().toString());
-		editor.commit();
+		// SharedPreferences preferences = PreferenceManager
+		// .getDefaultSharedPreferences(getBaseContext());
+		//
+		// SharedPreferences.Editor editor = preferences.edit();
+		// editor.putString("city", editTextLocation.getText().toString());
+		// editor.commit();
+		// clear previous data
 
 		dataDownloader = new DataDownloader(this);
 		if (bCentigrade) {
-			dataDownloader.execute(new String[] {
-					editTextLocation.getText().toString(), "cent" });
+			dataDownloader.execute(new String[] { "London", "cent" });
 		} else {
 			dataDownloader.execute(new String[] {
-					editTextLocation.getText().toString(), "fari" });
+					// editTextLocation.getText().toString(), "fari" });
+					"London", "cent" });
 		}
 
 	}
@@ -159,5 +172,19 @@ public class WeatherMonitorActivity extends ListActivity {
 
 	}
 
-	
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		// TODO Auto-generated method stub
+		getMenuInflater().inflate(R.menu.menu, menu);
+
+		return super.onCreateOptionsMenu(menu);
+	}
+
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		
+		startActivity(new Intent(this, PrefsActivity.class));
+		return true;
+	}
+
 }
