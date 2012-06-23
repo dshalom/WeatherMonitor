@@ -32,61 +32,62 @@ import org.w3c.dom.NodeList;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
+import android.util.Log;
+import android.widget.Button;
+
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 
-enum ErrorCodes {
+enum ErrorCode {
 	NOERROR, POSTCODEERROR, CONNECTIONERROR, OTHERERROR
 };
 
-public class DataDownloader extends AsyncTask<String, Void, ErrorCodes> {
+public class DataDownloader extends AsyncTask<String, Void, ErrorCode> {
 	WeatherMonitorActivity parent;
-	String xml;
-	final static int NUMBEROFDAYS = 4;
-	XMLParser parser;
-	final String REQUEST_ITEM = "request";
-	final String LOCATION_ITEM = "query";
-	final String KEY_ITEM = "weather"; // parent node
-	final String KEY_DATE = "date";
-	final String KEY_MINTEMPF = "tempMinF";
-	final String KEY_MAXTEMPF = "tempMaxF";
-	final String KEY_MINTEMPC = "tempMinC";
-	final String KEY_MAXTEMPC = "tempMaxC";
-	final String KEY_ICON = "weatherIconUrl";
-	String tempUnit;
-	String location;
-	NodeList nl;
-	Bitmap[] bitmaps = new Bitmap[NUMBEROFDAYS];
 
-	ErrorCodes error;
+	private static final String TAG = "DataDownloader";
+	private static final int NUMBEROFDAYS = 4;
+	private static final String REQUEST_ITEM = "request";
+	private static final String LOCATION_ITEM = "query";
+	private static final String KEY_ITEM = "weather"; // parent node
+	private static final String KEY_DATE = "date";
+	private static final String KEY_MINTEMPF = "tempMinF";
+	private static final String KEY_MAXTEMPF = "tempMaxF";
+	private static final String KEY_MINTEMPC = "tempMinC";
+	private static final String KEY_MAXTEMPC = "tempMaxC";
+	private static final String KEY_ICON = "weatherIconUrl";
+	private XMLParser parser;
+	private String location;
+	private Bitmap[] bitmaps = new Bitmap[NUMBEROFDAYS];
+	private NodeList nodeList;
 
-	public DataDownloader(WeatherMonitorActivity WeatherMonitorActivity) {
-		// TODO Auto-generated constructor stub
-		parent = WeatherMonitorActivity;
+	public DataDownloader(WeatherMonitorActivity parent) {
+		this.parent = parent;
 		parser = new XMLParser();
 	}
 
 	@Override
-	protected ErrorCodes doInBackground(String... params) {
-		error = ErrorCodes.NOERROR;
+	protected ErrorCode doInBackground(String... params) {
+
+		Log.d(TAG, String.format("doInBackground location: %S", params[0]));
+		ErrorCode error = ErrorCode.NOERROR;
 		String loc = params[0];
-		tempUnit = params[1];
 		String xml = null;
-		//make request
+		// make request
 		try {
 			xml = makeRequest(loc);
 		} catch (URISyntaxException e) {
 			// possibly pc is wrong
 			e.printStackTrace();
-			return ErrorCodes.POSTCODEERROR;
+			return ErrorCode.POSTCODEERROR;
 		} catch (ClientProtocolException e) {
 			// error making connection
 			e.printStackTrace();
-			return ErrorCodes.CONNECTIONERROR;
+			return ErrorCode.CONNECTIONERROR;
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-			return ErrorCodes.CONNECTIONERROR;
+			return ErrorCode.CONNECTIONERROR;
 		}
 
 		// Configure it to coalesce CDATA nodes
@@ -95,33 +96,32 @@ public class DataDownloader extends AsyncTask<String, Void, ErrorCodes> {
 		Document doc = parser.getDomElement(xml.toString());
 
 		// get the city or postcode details details
-		nl = doc.getElementsByTagName(REQUEST_ITEM);
-		if (nl.getLength() == 0) {
-			return ErrorCodes.POSTCODEERROR;
+		nodeList = doc.getElementsByTagName(REQUEST_ITEM);
+		if (nodeList.getLength() == 0) {
+			return ErrorCode.POSTCODEERROR;
 		}
-		Element requestElement = (Element) nl.item(0);
+		Element requestElement = (Element) nodeList.item(0);
 		location = parser.getValue(requestElement, LOCATION_ITEM);
 
-		
-		//start of daily report
-		nl = doc.getElementsByTagName(KEY_ITEM);
+		// start of daily report
+		nodeList = doc.getElementsByTagName(KEY_ITEM);
 
-		if (nl.getLength() == 0) {
-			return ErrorCodes.POSTCODEERROR;
+		if (nodeList.getLength() == 0) {
+			return ErrorCode.POSTCODEERROR;
 		}
-		//should be 5 days reported 
-		for (int i = 0; i < nl.getLength(); i++) {
-			Element e = (Element) nl.item(i);
+		// should be 5 days reported
+		for (int i = 0; i < nodeList.getLength(); i++) {
+			Element e = (Element) nodeList.item(i);
 
-			//pare bitmap info and fetch
-			//the rest of the information is collected in onPostExecute
+			// pare bitmap info and fetch
+			// the rest of the information is collected in onPostExecute
 			String icon = parser.getValue(e, KEY_ICON);
 			URL url = null;
 			try {
 				url = new URL(icon);
 			} catch (MalformedURLException e1) {
 				e1.printStackTrace();
-				return ErrorCodes.OTHERERROR;
+				return ErrorCode.OTHERERROR;
 			}
 			URLConnection connection = null;
 			InputStream is = null;
@@ -135,7 +135,7 @@ public class DataDownloader extends AsyncTask<String, Void, ErrorCodes> {
 				is.close();
 			} catch (IOException e1) {
 				e1.printStackTrace();
-				return ErrorCodes.CONNECTIONERROR;
+				return ErrorCode.CONNECTIONERROR;
 			}
 		}
 		return error;
@@ -144,10 +144,12 @@ public class DataDownloader extends AsyncTask<String, Void, ErrorCodes> {
 	public String makeRequest(String loc) throws URISyntaxException,
 			ClientProtocolException, IOException {
 
+		// prepare request
 		List<NameValuePair> qparams = new ArrayList<NameValuePair>();
 		qparams.add(new BasicNameValuePair("key", "6ffa3d38e9115055122204"));
 		qparams.add(new BasicNameValuePair("q", loc));
-		qparams.add(new BasicNameValuePair("num_of_days", String.valueOf(NUMBEROFDAYS)));
+		qparams.add(new BasicNameValuePair("num_of_days", String
+				.valueOf(NUMBEROFDAYS)));
 		qparams.add(new BasicNameValuePair("format", "xml"));
 		URI uri = null;
 
@@ -211,8 +213,8 @@ public class DataDownloader extends AsyncTask<String, Void, ErrorCodes> {
 	}
 
 	@Override
-	protected void onPostExecute(ErrorCodes result) {
-		if (result != ErrorCodes.NOERROR) {
+	protected void onPostExecute(ErrorCode result) {
+		if (result != ErrorCode.NOERROR) {
 			parent.showError(result);
 			return;
 		}
@@ -220,45 +222,51 @@ public class DataDownloader extends AsyncTask<String, Void, ErrorCodes> {
 		super.onPostExecute(result);
 		parent.textViewLocation.setText(location);
 		parent.adapter.clear();
-		updateTemps(tempUnit);
+		updateData();
 	}
 
-	public void updateTemps(String unit) {
+	public void updateData() {
 
-		// update unit, depends on unit
-		if (unit == "cent") {
-			for (int i = 0; i < nl.getLength(); i++) {
-				Element e = (Element) nl.item(i);
+		// find out what temperature unit to extract
+		String unit = parent.prefs.getString("prefTemperatureUnit",
+				"Centigrade");
+		String toMinTempToExtract = null;
+		String toMaxTempToExtract = null;
+		String degrees = null;
 
-				WeatherData weatherData = new WeatherData(
-						GetDayOfWeek(parser.getValue(e, KEY_DATE)), bitmaps[i],
-						parser.getValue(e, KEY_MINTEMPC) + "°C",
-						parser.getValue(e, KEY_MAXTEMPC) + "°C");
-				
-				parent.adapter.add(weatherData);
-
-			}
-
+		if (unit.equals("Centigrade")) {
+			toMinTempToExtract = KEY_MINTEMPC;
+			toMaxTempToExtract = KEY_MAXTEMPC;
+			degrees = "°C";
 		} else {
-			for (int i = 0; i < nl.getLength(); i++) {
-				Element e = (Element) nl.item(i);
-			}
-		}	
+			toMinTempToExtract = KEY_MINTEMPF;
+			toMaxTempToExtract = KEY_MAXTEMPF;
+			degrees = "°F";
+
+		}
+		Log.d(TAG,String.format("updateData %s %s", toMinTempToExtract,toMaxTempToExtract));
+		//update the data
+		for (int i = 0; i < nodeList.getLength(); i++) {
+			Element e = (Element) nodeList.item(i);
+
+			WeatherData weatherData = new WeatherData(
+					GetDayOfWeek(parser.getValue(e, KEY_DATE)), bitmaps[i],
+					parser.getValue(e, toMinTempToExtract) + degrees,
+					parser.getValue(e, toMaxTempToExtract) + degrees);
+
+			parent.adapter.add(weatherData);
+
+		}
+		//update last refresh and btn
 		String lastRefresh = "Updated: ";
 		lastRefresh += DateFormat.getDateInstance().format(new Date());
 		DateFormat dateFormat = new SimpleDateFormat("HH:mm a");
-		lastRefresh+= " " + dateFormat.format(new Date());
+		lastRefresh += " " + dateFormat.format(new Date());
 		parent.textViewLastRefresh.setText(lastRefresh);
+		
+		parent.buttonRefresh.setText(R.string.refresh);
+		parent.buttonRefresh.setClickable(true);
 
-	}
-
-	protected String parseXML(String xml) {
-		parser.getDomElement(xml);
-		return "";
-	}
-
-	public XMLParser parser() {
-		return parser;
 	}
 
 }

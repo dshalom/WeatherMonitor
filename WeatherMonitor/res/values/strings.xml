@@ -10,5 +10,8 @@
     <string name="preferences">Preferences</string>
     <string name="locationSummary">Postcode or City</string>
     <string name="weatherOutlook">Weather Outlook</string>
+    <string name="weatherIcon">Weather Icon</string>
+    <string name="centigrade">Centigrade</string>
+    <string name="refreshing">Refreshing data...</string>
 
 </resources>

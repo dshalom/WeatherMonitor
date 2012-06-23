@@ -2,11 +2,11 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
-    android:orientation="vertical" 
-    android:textStyle="bold"
-        android:textSize="22dp"
-        android:textColor="#FFFFFF">
-
+    android:orientation="vertical"
+    android:textColor="#FFFFFF"
+    android:textSize="22dp"
+    android:textStyle="bold" >
+
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -14,16 +14,16 @@
         android:text="@string/weatherOutlook"
         android:textAppearance="?android:attr/textAppearanceLarge" />
 
-     <TextView android:id="@+id/txtHeaderLocation"
+    <TextView
+        android:id="@+id/txtHeaderLocation"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
+        android:background="#336699"
         android:gravity="center_vertical"
-        android:textStyle="bold"
-        android:textSize="22dp"
-        android:textColor="#FFFFFF"
         android:padding="6dp"
         android:text=""
-        android:background="#336699" />
-    
+        android:textColor="#FFFFFF"
+        android:textSize="22dp"
+        android:textStyle="bold" />
 
 </LinearLayout>

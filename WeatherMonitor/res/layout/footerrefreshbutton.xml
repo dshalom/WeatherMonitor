@@ -5,7 +5,7 @@
     android:orientation="horizontal" >
 
     <Button
-        android:id="@+id/button1"
+        android:id="@+id/buttonRefresh"
         android:layout_width="match_parent"
         android:text="@string/refresh"
         android:padding="6dp"

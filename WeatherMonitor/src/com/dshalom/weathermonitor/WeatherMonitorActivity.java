@@ -5,41 +5,42 @@ import com.dshalom.weathermonitor.DataDownloader;
 import android.app.ListActivity;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
-import android.widget.EditText;
+import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
-public class WeatherMonitorActivity extends ListActivity {
+public class WeatherMonitorActivity extends ListActivity implements OnSharedPreferenceChangeListener {
 
-	DataDownloader dataDownloader;
-	EditText editTextLocation;
-	TextView textViewLocation, textViewLocationType, textViewLastRefresh;
-	final String centigrade = "CENTIGRADE";
-	final String postcode = "POSTCODE";
-	boolean bCentigrade, bPostCode;
+	private static final String TAG = "WeatherMonitorActivity";
+	TextView textViewLocation,textViewLastRefresh;
 	ArrayList<WeatherData> weatherDataList;
-	WeatherAdapter adapter;
 	long lastUpdate;
+	SharedPreferences prefs;
+	WeatherAdapter adapter;
+	Button buttonRefresh;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		this.requestWindowFeature(Window.FEATURE_NO_TITLE);
 		weatherDataList = new ArrayList<WeatherData>();
+	
 
 		adapter = new WeatherAdapter(this, R.layout.row, weatherDataList);
 
 		View header = (View) getLayoutInflater().inflate(
-				R.layout.listview_header_row, null);
+				R.layout.headerrow, null);
 
 		getListView().addHeaderView(header);
-		getListView().setBackgroundResource(R.drawable.sunnydaywinter);
+		getListView().setBackgroundResource(R.drawable.landscape);
 
 		View footerMsg = (View) getLayoutInflater().inflate(
 				R.layout.footerlastrefresh, null);
@@ -51,130 +52,56 @@ public class WeatherMonitorActivity extends ListActivity {
 		getListView().addFooterView(footerButton);
 
 		setListAdapter(adapter);
+		
+		prefs = PreferenceManager.getDefaultSharedPreferences(this);
+		prefs.registerOnSharedPreferenceChangeListener(this);
 
 		textViewLocation = (TextView) findViewById(R.id.txtHeaderLocation);
 		textViewLastRefresh = (TextView) findViewById(R.id.textViewLastRefresh);
-
-		// editTextLocation = (EditText) findViewById(R.id.editTextLocation);
-		// textViewLocation = (TextView) findViewById(R.id.textViewLocation);
-		//
-		// textViewLocationType = (TextView)
-		// findViewById(R.id.textViewLocationType);
-		//
-		// // ////get the location type and set
-		// SharedPreferences preferences = PreferenceManager
-		// .getDefaultSharedPreferences(getBaseContext());
-		// bCentigrade = preferences.getBoolean(centigrade, false);
-		// bPostCode = preferences.getBoolean(postcode, false);
-		//
-		// if (bPostCode) {
-		// textViewLocationType.setText("Enter Postcode");
-		// editTextLocation.setText(preferences.getString("postcode", "SW11"));
-		//
-		// } else {
-		// textViewLocationType.setText("Enter City");
-		// editTextLocation.setText(preferences.getString("city", "London"));
-		// }
+		
+		buttonRefresh = (Button) findViewById(R.id.buttonRefresh);
+		buttonRefresh.setText(R.string.refreshing);
+		buttonRefresh.setClickable(false);
 
 		// make the request
-		dataDownloader = new DataDownloader(this);
-		if (bCentigrade) {
-			dataDownloader.execute(new String[] { "London", "cent" });
-		} else {
-			dataDownloader.execute(new String[] {
-					// editTextLocation.getText().toString(), "fari" });
-					"London", "cent" });
-		}
-
+		doWeatherUpdate();
 	}
 
 	public void onGoClick(View v) {
-
-		// SharedPreferences preferences = PreferenceManager
-		// .getDefaultSharedPreferences(getBaseContext());
-		//
-		// SharedPreferences.Editor editor = preferences.edit();
-		// editor.putString("city", editTextLocation.getText().toString());
-		// editor.commit();
-		// clear previous data
-
-		dataDownloader = new DataDownloader(this);
-		if (bCentigrade) {
-			dataDownloader.execute(new String[] { "London", "cent" });
-		} else {
-			dataDownloader.execute(new String[] {
-					// editTextLocation.getText().toString(), "fari" });
-					"London", "cent" });
-		}
-
+		Log.d(TAG,"onGoClick");
+		doWeatherUpdate();
+	}
+	
+	private void doWeatherUpdate()
+	{
+		DataDownloader dataDownloader = new DataDownloader(this);
+		Log.d(TAG,"doWeatherUpdate");
+		
+		String location = prefs.getString("prefLocation", "London");
+		Log.d(TAG, String.format("%s", location));	
+		dataDownloader.execute(new String[] { location });
+		
 	}
 
-	public void showError(ErrorCodes result) {
-
+	public void showError(ErrorCode result) {
+		Log.d(TAG,"showError " + result);
 		Toast toast = null;
-		if (result == ErrorCodes.CONNECTIONERROR
-				|| result == ErrorCodes.OTHERERROR) {
+		if (result == ErrorCode.CONNECTIONERROR
+				|| result == ErrorCode.OTHERERROR) {
 			toast = Toast.makeText(getBaseContext(),
 					"Error, please check internet connection!",
 					Toast.LENGTH_SHORT);
-		} else if (result == ErrorCodes.POSTCODEERROR) {
+		} else if (result == ErrorCode.POSTCODEERROR) {
 			toast = Toast.makeText(getBaseContext(),
 					"Error, please check location!", Toast.LENGTH_SHORT);
 		}
 		toast.show();
 	}
 
-	public void configureClicked(View view) {
-		SharedPreferences preferences = PreferenceManager
-				.getDefaultSharedPreferences(getBaseContext());
-		// if any field is blank retrieve data from preferences
-
-		Intent intent = new Intent();
-		intent.putExtra(centigrade, preferences.getBoolean(centigrade, false));
-		intent.putExtra(postcode, preferences.getBoolean(postcode, false));
-		intent.setClass(this, ConfigActivity.class);
-		startActivityForResult(intent, 0);
-	}
-
-	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-		super.onActivityResult(requestCode, resultCode, data);
-
-		SharedPreferences preferences = PreferenceManager
-				.getDefaultSharedPreferences(getBaseContext());
-		boolean bPC = data.getBooleanExtra(postcode, false);
-		boolean bCent = data.getBooleanExtra(centigrade, false);
-		// if any field is blank retrieve data from preferences
-		SharedPreferences.Editor editor = preferences.edit();
-		editor.putBoolean(centigrade, bCent);
-		editor.putBoolean(postcode, bPC);
-		editor.commit();
-		// update the textview
-		if (bPC != bPostCode) {
-			bPostCode = bPC;
-			if (bPostCode) {
-				textViewLocationType.setText("Enter Postcode");
-				editTextLocation.setText("");
-
-			} else {
-				textViewLocationType.setText("Enter City");
-				editTextLocation.setText("");
-			}
-		}
-		// update unit
-		if (bCent != bCentigrade) {
-			bCentigrade = bCent;
-			if (bCent) {
-				dataDownloader.updateTemps("cent");
-			} else {
-				dataDownloader.updateTemps("fari");
-			}
-		}
-
-	}
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
-		// TODO Auto-generated method stub
+		Log.d(TAG,"onCreateOptionsMenu");
 		getMenuInflater().inflate(R.menu.menu, menu);
 
 		return super.onCreateOptionsMenu(menu);
@@ -182,9 +109,15 @@ public class WeatherMonitorActivity extends ListActivity {
 
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
-		
+		Log.d(TAG,"showError");
 		startActivity(new Intent(this, PrefsActivity.class));
 		return true;
+	}
+
+	public void onSharedPreferenceChanged(SharedPreferences arg0, String key) {
+		Log.d(TAG,"onSharedPreferenceChanged " + key);
+		doWeatherUpdate();
+		
 	}
 
 }

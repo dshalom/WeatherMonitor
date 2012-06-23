@@ -8,7 +8,6 @@
         android:id="@+id/textViewLastRefresh"
         android:layout_width="match_parent"
         android:layout_height="40dp"
-        android:text="lastrefresh"
         android:clickable="false"
         android:textAppearance="?android:attr/textAppearanceLarge" android:hapticFeedbackEnabled="false"/>
 

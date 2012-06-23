@@ -19,6 +19,7 @@
 
     <ImageView
         android:id="@+id/imageViewIcon"
+        android:contentDescription="@string/weatherIcon"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginBottom="5dp"
@@ -36,7 +37,6 @@
         android:layout_marginTop="5dp"
         android:clickable="false"
         android:gravity="center_vertical"
-        android:text=""
         android:textAppearance="?android:attr/textAppearanceLarge" />
 
     <TextView
@@ -48,7 +48,6 @@
         android:layout_marginTop="5dp"
         android:clickable="false"
         android:gravity="center_vertical"
-        android:text="15°"
         android:textAppearance="?android:attr/textAppearanceLarge" />
 
 </LinearLayout>
