@@ -33,8 +33,6 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.util.Log;
-import android.widget.Button;
-
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 
@@ -46,7 +44,7 @@ public class DataDownloader extends AsyncTask<String, Void, ErrorCode> {
 	WeatherMonitorActivity parent;
 
 	private static final String TAG = "DataDownloader";
-	private static final int NUMBEROFDAYS = 4;
+	private static final int NUMBEROFDAYS = 5;
 	private static final String REQUEST_ITEM = "request";
 	private static final String LOCATION_ITEM = "query";
 	private static final String KEY_ITEM = "weather"; // parent node

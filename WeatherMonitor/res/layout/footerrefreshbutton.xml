@@ -3,17 +3,17 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="horizontal" >
-
+
     <Button
         android:id="@+id/buttonRefresh"
         android:layout_width="match_parent"
-        android:text="@string/refresh"
-        android:padding="6dp"
-        android:onClick="onGoClick"
-         android:textStyle="bold"
-        android:textSize="22dp"
-        android:textColor="#FFFFFF"
         android:layout_height="40dp"
-        android:background="#336699"/>
- 
+        android:background="#336699"
+        android:onClick="onGoClick"
+        android:padding="5dp"
+        android:text="@string/refresh"
+        android:textColor="#FFFFFF"
+        android:textSize="22dp"
+        android:textStyle="bold" />
+
 </LinearLayout>

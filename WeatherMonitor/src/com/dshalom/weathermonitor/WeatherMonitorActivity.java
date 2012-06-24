@@ -32,7 +32,6 @@ public class WeatherMonitorActivity extends ListActivity implements OnSharedPref
 		super.onCreate(savedInstanceState);
 		this.requestWindowFeature(Window.FEATURE_NO_TITLE);
 		weatherDataList = new ArrayList<WeatherData>();
-	
 
 		adapter = new WeatherAdapter(this, R.layout.row, weatherDataList);
 
@@ -40,7 +39,7 @@ public class WeatherMonitorActivity extends ListActivity implements OnSharedPref
 				R.layout.headerrow, null);
 
 		getListView().addHeaderView(header);
-		getListView().setBackgroundResource(R.drawable.landscape);
+		getListView().setBackgroundResource(R.drawable.seagulls);
 
 		View footerMsg = (View) getLayoutInflater().inflate(
 				R.layout.footerlastrefresh, null);
@@ -50,6 +49,7 @@ public class WeatherMonitorActivity extends ListActivity implements OnSharedPref
 
 		getListView().addFooterView(footerMsg);
 		getListView().addFooterView(footerButton);
+		getListView().setClickable(false);
 
 		setListAdapter(adapter);
 		

@@ -12,19 +12,20 @@
         android:layout_marginLeft="15dp"
         android:layout_marginRight="15dp"
         android:layout_marginTop="5dp"
-        android:clickable="false"
+        android:focusable="false"
         android:gravity="center_vertical"
         android:text=""
         android:textAppearance="?android:attr/textAppearanceLarge" />
 
     <ImageView
         android:id="@+id/imageViewIcon"
-        android:contentDescription="@string/weatherIcon"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_gravity="center_vertical"
         android:layout_marginBottom="5dp"
         android:layout_marginTop="5dp"
-        android:clickable="false"
+        android:contentDescription="@string/weatherIcon"
+        android:focusable="false"
         android:gravity="center_vertical"
         android:src="@drawable/weather" />
 
@@ -35,7 +36,7 @@
         android:layout_marginBottom="5dp"
         android:layout_marginLeft="15dp"
         android:layout_marginTop="5dp"
-        android:clickable="false"
+        android:focusable="false"
         android:gravity="center_vertical"
         android:textAppearance="?android:attr/textAppearanceLarge" />
 
@@ -46,7 +47,7 @@
         android:layout_marginBottom="5dp"
         android:layout_marginLeft="15dp"
         android:layout_marginTop="5dp"
-        android:clickable="false"
+        android:focusable="false"
         android:gravity="center_vertical"
         android:textAppearance="?android:attr/textAppearanceLarge" />
 

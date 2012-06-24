@@ -3,15 +3,14 @@
 
     <string name="hello">Hello World, WeatherMonitorActivity!</string>
     <string name="app_name">WeatherMonitor</string>
-    <string name="weather_outlook">Weather Outlook</string>
+    <string name="weather_monitor">\t\t\t\t\tWeather Monitor</string>
     <string name="refresh">Refresh</string>
     <string name="temperatureUnit">Temperature Unit</string>
     <string name="location">Location</string>
     <string name="preferences">Preferences</string>
     <string name="locationSummary">Postcode or City</string>
-    <string name="weatherOutlook">Weather Outlook</string>
     <string name="weatherIcon">Weather Icon</string>
     <string name="centigrade">Centigrade</string>
-    <string name="refreshing">Refreshing data...</string>
+    <string name="refreshing">Refreshing data&#8230;</string>
 
 </resources>
