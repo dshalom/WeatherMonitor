@@ -24,11 +24,12 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity
-            android:name=".ConfigActivity"
-            android:label="Configuration" >
+
+        <activity android:name=".PrefsActivity" 
+            android:label="@string/preferences"
+            android:icon="@drawable/launcher">
+           
         </activity>
-        <activity android:name=".PrefsActivity"></activity>
     </application>
 
 </manifest>
