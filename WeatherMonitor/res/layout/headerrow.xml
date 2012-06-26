@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
-    android:layout_height="fill_parent"
+    android:layout_height="wrap_content"
     android:orientation="vertical"
     android:textColor="#FFFFFF"
     android:textSize="22dp"
@@ -9,10 +9,10 @@
 
     <TextView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
+        android:layout_height="38dp"
+        android:gravity="center_horizontal"
         android:background="#336699"
-        android:padding="4dp"
+        android:padding="3dp"
         android:text="@string/weather_monitor"
         android:textColor="#FFFFFF"
         android:textSize="22dp"
@@ -21,11 +21,11 @@
     <TextView
         android:id="@+id/txtHeaderLocation"
         android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="33dp"
         android:gravity="center_vertical"
-        android:padding="4dp"
+        android:padding="3dp"
         android:text=""
         android:textColor="#FFFFFF"
-        android:textSize="22dp" />
+        android:textSize="18dp" />
 
 </LinearLayout>

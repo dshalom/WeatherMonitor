@@ -7,10 +7,10 @@
     <Button
         android:id="@+id/buttonRefresh"
         android:layout_width="match_parent"
-        android:layout_height="40dp"
+        android:layout_height="42dp"
         android:background="#336699"
         android:onClick="onGoClick"
-        android:padding="5dp"
+        android:padding="4dp"
         android:text="@string/refresh"
         android:textColor="#FFFFFF"
         android:textSize="22dp"

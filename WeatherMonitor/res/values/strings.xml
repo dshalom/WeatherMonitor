@@ -3,7 +3,7 @@
 
     <string name="hello">Hello World, WeatherMonitorActivity!</string>
     <string name="app_name">WeatherMonitor</string>
-    <string name="weather_monitor">\t\t\t\t\tWeather Monitor</string>
+    <string name="weather_monitor">Weather Monitor</string>
     <string name="refresh">Refresh</string>
     <string name="temperatureUnit">Temperature Unit</string>
     <string name="location">Location</string>

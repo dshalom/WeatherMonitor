@@ -12,7 +12,7 @@
     </uses-permission>
 
     <application
-        android:icon="@drawable/weather"
+        android:icon="@drawable/launcher"
         android:label="@string/app_name" >
         <activity
             android:name=".WeatherMonitorActivity"

@@ -32,6 +32,7 @@ import org.w3c.dom.NodeList;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -44,7 +45,7 @@ public class DataDownloader extends AsyncTask<String, Void, ErrorCode> {
 	WeatherMonitorActivity parent;
 
 	private static final String TAG = "DataDownloader";
-	private static final int NUMBEROFDAYS = 5;
+	// private static final int NUMBEROFDAYS = 5;
 	private static final String REQUEST_ITEM = "request";
 	private static final String LOCATION_ITEM = "query";
 	private static final String KEY_ITEM = "weather"; // parent node
@@ -56,12 +57,20 @@ public class DataDownloader extends AsyncTask<String, Void, ErrorCode> {
 	private static final String KEY_ICON = "weatherIconUrl";
 	private XMLParser parser;
 	private String location;
-	private Bitmap[] bitmaps = new Bitmap[NUMBEROFDAYS];
+	private Bitmap[] bitmaps;
 	private NodeList nodeList;
+	private static int numberOfDays;
 
 	public DataDownloader(WeatherMonitorActivity parent) {
 		this.parent = parent;
 		parser = new XMLParser();
+
+		DisplayMetrics metrics = new DisplayMetrics();
+		parent.getWindowManager().getDefaultDisplay().getMetrics(metrics);
+		//on a low density screen only display 4 days of data
+		numberOfDays = (metrics.densityDpi == DisplayMetrics.DENSITY_LOW) ? 4 : 5;
+		bitmaps = new Bitmap[numberOfDays];
+		
 	}
 
 	@Override
@@ -147,7 +156,7 @@ public class DataDownloader extends AsyncTask<String, Void, ErrorCode> {
 		qparams.add(new BasicNameValuePair("key", "6ffa3d38e9115055122204"));
 		qparams.add(new BasicNameValuePair("q", loc));
 		qparams.add(new BasicNameValuePair("num_of_days", String
-				.valueOf(NUMBEROFDAYS)));
+				.valueOf(numberOfDays)));
 		qparams.add(new BasicNameValuePair("format", "xml"));
 		URI uri = null;
 
@@ -242,8 +251,9 @@ public class DataDownloader extends AsyncTask<String, Void, ErrorCode> {
 			degrees = "°F";
 
 		}
-		Log.d(TAG,String.format("updateData %s %s", toMinTempToExtract,toMaxTempToExtract));
-		//update the data
+		Log.d(TAG, String.format("updateData %s %s", toMinTempToExtract,
+				toMaxTempToExtract));
+		// update the data
 		for (int i = 0; i < nodeList.getLength(); i++) {
 			Element e = (Element) nodeList.item(i);
 
@@ -255,13 +265,13 @@ public class DataDownloader extends AsyncTask<String, Void, ErrorCode> {
 			parent.adapter.add(weatherData);
 
 		}
-		//update last refresh and btn
+		// update last refresh and btn
 		String lastRefresh = "Updated: ";
 		lastRefresh += DateFormat.getDateInstance().format(new Date());
 		DateFormat dateFormat = new SimpleDateFormat("HH:mm a");
 		lastRefresh += " " + dateFormat.format(new Date());
 		parent.textViewLastRefresh.setText(lastRefresh);
-		
+
 		parent.buttonRefresh.setText(R.string.refresh);
 		parent.buttonRefresh.setClickable(true);
 

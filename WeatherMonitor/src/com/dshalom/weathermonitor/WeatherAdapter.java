@@ -57,7 +57,7 @@ public class WeatherAdapter extends ArrayAdapter<WeatherData> {
 		holder.imageViewIcon.setImageBitmap(weather.bitmap);
 		 
 		
-		holder.textViewDay.setMinHeight(screenHeight/9);
+		//holder.textViewDay.setMinHeight(screenHeight/9);
 		return row;
 
 	}
