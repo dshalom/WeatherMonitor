@@ -91,9 +91,18 @@ public class WeatherMonitorActivity extends ListActivity implements OnSharedPref
 			toast = Toast.makeText(getBaseContext(),
 					"Error, please check internet connection!",
 					Toast.LENGTH_SHORT);
+			//update widgets
+			textViewLastRefresh.setText(R.string.connectionError);
+			buttonRefresh.setText(R.string.refresh);
+			buttonRefresh.setClickable(true);
+			
 		} else if (result == ErrorCode.POSTCODEERROR) {
 			toast = Toast.makeText(getBaseContext(),
 					"Error, please check location!", Toast.LENGTH_SHORT);
+			//update widgets
+			textViewLastRefresh.setText(R.string.locationError);
+			buttonRefresh.setText(R.string.refresh);
+			buttonRefresh.setClickable(true);
 		}
 		toast.show();
 	}

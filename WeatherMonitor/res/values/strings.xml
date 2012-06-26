@@ -12,5 +12,7 @@
     <string name="weatherIcon">Weather Icon</string>
     <string name="centigrade">Centigrade</string>
     <string name="refreshing">Refreshing data&#8230;</string>
+    <string name="locationError">Unknown location</string>
+    <string name="connectionError">Connection error</string>
 
 </resources>

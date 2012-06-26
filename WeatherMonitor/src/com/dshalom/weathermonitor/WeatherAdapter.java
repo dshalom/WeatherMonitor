@@ -4,15 +4,11 @@ import java.util.ArrayList;
 import java.util.List;
 import android.app.Activity;
 import android.content.Context;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.WindowManager;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.LinearLayout.LayoutParams;
 import android.widget.TextView;
 
 public class WeatherAdapter extends ArrayAdapter<WeatherData> {
@@ -49,15 +45,12 @@ public class WeatherAdapter extends ArrayAdapter<WeatherData> {
 		} else {
 			holder = (WeatherHolder) row.getTag();
 		}
-		int screenHeight = ((WindowManager)context.getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay().getHeight();
 		WeatherData weather = weatherDataList.get(position);
 		holder.textViewDay.setText(weather.day);
 		holder.textViewLow.setText(weather.low);
 		holder.textViewHigh.setText(weather.high);
 		holder.imageViewIcon.setImageBitmap(weather.bitmap);
 		 
-		
-		//holder.textViewDay.setMinHeight(screenHeight/9);
 		return row;
 
 	}

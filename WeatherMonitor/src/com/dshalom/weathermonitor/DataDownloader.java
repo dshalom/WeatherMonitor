@@ -265,7 +265,7 @@ public class DataDownloader extends AsyncTask<String, Void, ErrorCode> {
 			parent.adapter.add(weatherData);
 
 		}
-		// update last refresh and btn
+		// update last refresh and button
 		String lastRefresh = "Updated: ";
 		lastRefresh += DateFormat.getDateInstance().format(new Date());
 		DateFormat dateFormat = new SimpleDateFormat("HH:mm a");
