@@ -2,13 +2,13 @@ package com.dshalom.weathermonitor;
 
 import java.util.ArrayList;
 import com.dshalom.weathermonitor.DataDownloader;
+import com.dshalom.weathermonitor2.R;
 import android.app.ListActivity;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -19,7 +19,6 @@ import android.widget.Toast;
 
 public class WeatherMonitorActivity extends ListActivity implements OnSharedPreferenceChangeListener {
 
-	private static final String TAG = "WeatherMonitorActivity";
 	TextView textViewLocation,textViewLastRefresh;
 	ArrayList<WeatherData> weatherDataList;
 	long lastUpdate;
@@ -68,23 +67,17 @@ public class WeatherMonitorActivity extends ListActivity implements OnSharedPref
 	}
 
 	public void onGoClick(View v) {
-		Log.d(TAG,"onGoClick");
 		doWeatherUpdate();
 	}
 	
 	private void doWeatherUpdate()
 	{
-		DataDownloader dataDownloader = new DataDownloader(this);
-		Log.d(TAG,"doWeatherUpdate");
-		
+		DataDownloader dataDownloader = new DataDownloader(this);		
 		String location = prefs.getString("prefLocation", "London");
-		Log.d(TAG, String.format("%s", location));	
-		dataDownloader.execute(new String[] { location });
-		
+		dataDownloader.execute(new String[] { location });		
 	}
 
 	public void showError(ErrorCode result) {
-		Log.d(TAG,"showError " + result);
 		Toast toast = null;
 		if (result == ErrorCode.CONNECTIONERROR
 				|| result == ErrorCode.OTHERERROR) {
@@ -110,7 +103,6 @@ public class WeatherMonitorActivity extends ListActivity implements OnSharedPref
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
-		Log.d(TAG,"onCreateOptionsMenu");
 		getMenuInflater().inflate(R.menu.menu, menu);
 
 		return super.onCreateOptionsMenu(menu);
@@ -118,13 +110,11 @@ public class WeatherMonitorActivity extends ListActivity implements OnSharedPref
 
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
-		Log.d(TAG,"showError");
 		startActivity(new Intent(this, PrefsActivity.class));
 		return true;
 	}
 
 	public void onSharedPreferenceChanged(SharedPreferences arg0, String key) {
-		Log.d(TAG,"onSharedPreferenceChanged " + key);
 		doWeatherUpdate();
 		
 	}

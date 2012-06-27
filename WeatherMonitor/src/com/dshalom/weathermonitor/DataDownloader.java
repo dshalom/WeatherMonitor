@@ -14,6 +14,8 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
 import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
@@ -29,11 +31,13 @@ import org.apache.http.util.EntityUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
+
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.util.DisplayMetrics;
-import android.util.Log;
+import com.dshalom.weathermonitor2.R;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 
@@ -44,8 +48,6 @@ enum ErrorCode {
 public class DataDownloader extends AsyncTask<String, Void, ErrorCode> {
 	WeatherMonitorActivity parent;
 
-	private static final String TAG = "DataDownloader";
-	// private static final int NUMBEROFDAYS = 5;
 	private static final String REQUEST_ITEM = "request";
 	private static final String LOCATION_ITEM = "query";
 	private static final String KEY_ITEM = "weather"; // parent node
@@ -67,16 +69,16 @@ public class DataDownloader extends AsyncTask<String, Void, ErrorCode> {
 
 		DisplayMetrics metrics = new DisplayMetrics();
 		parent.getWindowManager().getDefaultDisplay().getMetrics(metrics);
-		//on a low density screen only display 4 days of data
-		numberOfDays = (metrics.densityDpi == DisplayMetrics.DENSITY_LOW) ? 4 : 5;
+		// on a low density screen only display 4 days of data
+		numberOfDays = (metrics.densityDpi == DisplayMetrics.DENSITY_LOW) ? 4
+				: 5;
 		bitmaps = new Bitmap[numberOfDays];
-		
+
 	}
 
 	@Override
 	protected ErrorCode doInBackground(String... params) {
 
-		Log.d(TAG, String.format("doInBackground location: %S", params[0]));
 		ErrorCode error = ErrorCode.NOERROR;
 		String loc = params[0];
 		String xml = null;
@@ -100,7 +102,19 @@ public class DataDownloader extends AsyncTask<String, Void, ErrorCode> {
 		// Configure it to coalesce CDATA nodes
 		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
 		factory.setCoalescing(true);
-		Document doc = parser.getDomElement(xml.toString());
+		Document doc = null;
+		try {
+			doc = parser.getDomElement(xml.toString());
+		} catch (SAXException e) {
+			e.printStackTrace();
+			return ErrorCode.OTHERERROR;
+		} catch (IOException e) {
+			e.printStackTrace();
+			return ErrorCode.OTHERERROR;
+		} catch (ParserConfigurationException e2) {
+			e2.printStackTrace();
+			return ErrorCode.OTHERERROR;
+		}
 
 		// get the city or postcode details details
 		nodeList = doc.getElementsByTagName(REQUEST_ITEM);
@@ -251,8 +265,7 @@ public class DataDownloader extends AsyncTask<String, Void, ErrorCode> {
 			degrees = "°F";
 
 		}
-		Log.d(TAG, String.format("updateData %s %s", toMinTempToExtract,
-				toMaxTempToExtract));
+
 		// update the data
 		for (int i = 0; i < nodeList.getLength(); i++) {
 			Element e = (Element) nodeList.item(i);

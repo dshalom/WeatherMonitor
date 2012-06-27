@@ -1,21 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.dshalom.weathermonitor"
-    android:versionCode="3"
-    android:versionName="1.11" >
+    package="com.dshalom.weathermonitor2"
+    android:versionCode="5"
+    android:versionName="2.0" >
 
     <uses-sdk android:minSdkVersion="8" 
-        android:targetSdkVersion="8"
-        android:maxSdkVersion="14"/>
+        android:targetSdkVersion="15"/>
 
     <uses-permission android:name="android.permission.INTERNET" >
     </uses-permission>
-
+S
     <application
         android:icon="@drawable/launcher"
         android:label="@string/app_name" >
         <activity
-            android:name=".WeatherMonitorActivity"
+            android:name="com.dshalom.weathermonitor.WeatherMonitorActivity"
             android:label="@string/app_name"
             android:screenOrientation="portrait" >
             <intent-filter>
@@ -25,7 +24,7 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".PrefsActivity" 
+        <activity android:name="com.dshalom.weathermonitor.PrefsActivity" 
             android:label="@string/preferences"
             android:icon="@drawable/launcher">
            

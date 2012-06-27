@@ -22,8 +22,6 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
-import android.util.Log;
-
 public class XMLParser {
 
 	public XMLParser() {
@@ -54,35 +52,21 @@ public class XMLParser {
 		return xml;
 	}
 
-	public Document getDomElement(String xml) {
+	public Document getDomElement(String xml)
+			throws ParserConfigurationException, SAXException, IOException {
 		Document doc = null;
 
 		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 		// Configure it to coalesce CDATA nodes
 		dbf.setCoalescing(true);
+		DocumentBuilder db = dbf.newDocumentBuilder();
 
-		try {
+		InputSource is = new InputSource();
+		is.setCharacterStream(new StringReader(xml));
+		doc = db.parse(is);
 
-			DocumentBuilder db = dbf.newDocumentBuilder();
-
-			InputSource is = new InputSource();
-			is.setCharacterStream(new StringReader(xml));
-			doc = db.parse(is);
-
-		} catch (ParserConfigurationException e) {
-			Log.e("Error: ", e.getMessage());
-			return null;
-		} catch (SAXException e) {
-			Log.e("Error: ", e.getMessage());
-			return null;
-		} catch (IOException e) {
-			Log.e("Error: ", e.getMessage());
-			return null;
-		}
 		// return DOM
-
 		doc.getDocumentElement().normalize();
-
 		return doc;
 	}
 
