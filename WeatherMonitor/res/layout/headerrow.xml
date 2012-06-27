@@ -11,7 +11,7 @@
         android:layout_width="match_parent"
         android:layout_height="38dp"
         android:gravity="center_horizontal"
-        android:background="#336699"
+        android:background="@drawable/header_look"
         android:padding="3dp"
         android:text="@string/weather_monitor"
         android:textColor="#FFFFFF"
