@@ -1,169 +1,123 @@
 package com.dshalom.weathermonitor;
 
+import com.crashlytics.android.Crashlytics;
+import java.util.ArrayList;
 import com.dshalom.weathermonitor.DataDownloader;
-
-import android.app.Activity;
+import android.app.ListActivity;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
-import android.widget.EditText;
-import android.widget.ImageView;
+import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
-public class WeatherMonitorActivity extends Activity {
+public class WeatherMonitorActivity extends ListActivity implements OnSharedPreferenceChangeListener {
 
-	public DataDownloader dataDownloader;
-	EditText editTextLocation;
-	TextView textViewLocation, textViewLocationType;
-	final String centigrade = "CENTIGRADE";
-	final String postcode = "POSTCODE";
-	boolean bCentigrade, bPostCode;
-
-	TextView[] textViewDateArray = new TextView[3];
-	TextView[] textViewDayHighArray = new TextView[3];
-	TextView[] textViewDayLowArray = new TextView[3];
-	ImageView[] imageViewArray = new ImageView[3];
-
-	ImageView imageViewdat1, imageViewdat2, imageViewdat3;
+	TextView textViewLocation,textViewLastRefresh;
+	ArrayList<WeatherData> weatherDataList;
+	long lastUpdate;
+	SharedPreferences prefs;
+	WeatherAdapter adapter;
+	Button buttonRefresh;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		Crashlytics.start(this);
 		this.requestWindowFeature(Window.FEATURE_NO_TITLE);
-		setContentView(R.layout.main);
+		weatherDataList = new ArrayList<WeatherData>();
 
-		textViewDateArray[0] = (TextView) findViewById(R.id.textViewDay1Date);
-		textViewDateArray[1] = (TextView) findViewById(R.id.textViewDay2Date);
-		textViewDateArray[2] = (TextView) findViewById(R.id.textViewDay3Date);
+		adapter = new WeatherAdapter(this, R.layout.row, weatherDataList);
 
-		textViewDayHighArray[0] = (TextView) findViewById(R.id.textViewDay1High);
-		textViewDayHighArray[1] = (TextView) findViewById(R.id.textViewDay2High);
-		textViewDayHighArray[2] = (TextView) findViewById(R.id.textViewDay3High);
+		View header = (View) getLayoutInflater().inflate(
+				R.layout.headerrow, null);
 
-		textViewDayLowArray[0] = (TextView) findViewById(R.id.textViewDay1Low);
-		textViewDayLowArray[1] = (TextView) findViewById(R.id.textViewDay2Low);
-		textViewDayLowArray[2] = (TextView) findViewById(R.id.textViewDay3Low);
+		getListView().addHeaderView(header);
+		getListView().setBackgroundResource(R.drawable.seagulls);
 
-		imageViewArray[0] = (ImageView) findViewById(R.id.imageViewDay1);
-		imageViewArray[1] = (ImageView) findViewById(R.id.imageViewDay2);
-		imageViewArray[2] = (ImageView) findViewById(R.id.imageViewDay3);
+		View footerMsg = (View) getLayoutInflater().inflate(
+				R.layout.footerlastrefresh, null);
 
-		editTextLocation = (EditText) findViewById(R.id.editTextLocation);
-		textViewLocation = (TextView) findViewById(R.id.textViewLocation);
+		View footerButton = (View) getLayoutInflater().inflate(
+				R.layout.footerrefreshbutton, null);
 
-		textViewLocationType = (TextView) findViewById(R.id.textViewLocationType);
+		getListView().addFooterView(footerMsg);
+		getListView().addFooterView(footerButton);
+		getListView().setClickable(false);
 
-		// ////get the location type and set
-		SharedPreferences preferences = PreferenceManager
-				.getDefaultSharedPreferences(getBaseContext());
-		bCentigrade = preferences.getBoolean(centigrade, false);
-		bPostCode = preferences.getBoolean(postcode, false);
+		setListAdapter(adapter);
+		
+		prefs = PreferenceManager.getDefaultSharedPreferences(this);
+		prefs.registerOnSharedPreferenceChangeListener(this);
 
-		if (bPostCode) {
-			textViewLocationType.setText("Enter Postcode");
-			editTextLocation.setText(preferences.getString("postcode", "SW11"));
-
-		} else {
-			textViewLocationType.setText("Enter City");
-			editTextLocation.setText(preferences.getString("city", "London"));
-		}
+		textViewLocation = (TextView) findViewById(R.id.txtHeaderLocation);
+		textViewLastRefresh = (TextView) findViewById(R.id.textViewLastRefresh);
+		
+		buttonRefresh = (Button) findViewById(R.id.buttonRefresh);
+		buttonRefresh.setText(R.string.refreshing);
+		buttonRefresh.setClickable(false);
 
 		// make the request
-		dataDownloader = new DataDownloader(this);
-		if (bCentigrade) {
-			dataDownloader.execute(new String[] {
-					editTextLocation.getText().toString(), "cent" });
-		} else {
-			dataDownloader.execute(new String[] {
-					editTextLocation.getText().toString(), "fari" });
-		}
-
+		doWeatherUpdate();
 	}
 
 	public void onGoClick(View v) {
-
-		SharedPreferences preferences = PreferenceManager
-				.getDefaultSharedPreferences(getBaseContext());
+		doWeatherUpdate();
+	}
 	
-		SharedPreferences.Editor editor = preferences.edit();
-		editor.putString("city", editTextLocation.getText().toString());
-		editor.commit();
-
-		dataDownloader = new DataDownloader(this);
-		if (bCentigrade) {
-			dataDownloader.execute(new String[] {
-					editTextLocation.getText().toString(), "cent" });
-		} else {
-			dataDownloader.execute(new String[] {
-					editTextLocation.getText().toString(), "fari" });
-		}
-
+	private void doWeatherUpdate()
+	{
+		DataDownloader dataDownloader = new DataDownloader(this);		
+		String location = prefs.getString("prefLocation", "London");
+		dataDownloader.execute(new String[] { location });		
 	}
 
 	public void showError(ErrorCodes result) {
-
 		Toast toast = null;
 		if (result == ErrorCodes.CONNECTIONERROR
 				|| result == ErrorCodes.OTHERERROR) {
 			toast = Toast.makeText(getBaseContext(),
 					"Error, please check internet connection!",
 					Toast.LENGTH_SHORT);
+			//update widgets
+			textViewLastRefresh.setText(R.string.connectionError);
+			buttonRefresh.setText(R.string.refresh);
+			buttonRefresh.setClickable(true);
+			
 		} else if (result == ErrorCodes.POSTCODEERROR) {
 			toast = Toast.makeText(getBaseContext(),
 					"Error, please check location!", Toast.LENGTH_SHORT);
+			//update widgets
+			textViewLastRefresh.setText(R.string.locationError);
+			buttonRefresh.setText(R.string.refresh);
+			buttonRefresh.setClickable(true);
 		}
 		toast.show();
 	}
 
-	public void configureClicked(View view) {
-		SharedPreferences preferences = PreferenceManager
-				.getDefaultSharedPreferences(getBaseContext());
-		// if any field is blank retrieve data from preferences
 
-		Intent intent = new Intent();
-		intent.putExtra(centigrade, preferences.getBoolean(centigrade, false));
-		intent.putExtra(postcode, preferences.getBoolean(postcode, false));
-		intent.setClass(this, ConfigActivity.class);
-		startActivityForResult(intent, 0);
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		getMenuInflater().inflate(R.menu.menu, menu);
+
+		return super.onCreateOptionsMenu(menu);
 	}
 
-	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-		super.onActivityResult(requestCode, resultCode, data);
-
-		SharedPreferences preferences = PreferenceManager
-				.getDefaultSharedPreferences(getBaseContext());
-		boolean bPC = data.getBooleanExtra(postcode, false);
-		boolean bCent = data.getBooleanExtra(centigrade, false);
-		// if any field is blank retrieve data from preferences
-		SharedPreferences.Editor editor = preferences.edit();
-		editor.putBoolean(centigrade, bCent);
-		editor.putBoolean(postcode, bPC);
-		editor.commit();
-		// update the textview
-		if (bPC != bPostCode) {
-			bPostCode = bPC;
-			if (bPostCode) {
-				textViewLocationType.setText("Enter Postcode");
-				editTextLocation.setText("");
-
-			} else {
-				textViewLocationType.setText("Enter City");
-				editTextLocation.setText("");
-			}
-		}
-		// update unit
-		if (bCent != bCentigrade) {
-			bCentigrade = bCent;
-			if (bCent) {
-				dataDownloader.updateTemps("cent");
-			} else {
-				dataDownloader.updateTemps("fari");
-			}
-		}
-
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		startActivity(new Intent(this, PrefsActivity.class));
+		return true;
 	}
+
+	public void onSharedPreferenceChanged(SharedPreferences arg0, String key) {
+		doWeatherUpdate();
+		
+	}
+
 }

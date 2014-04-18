@@ -8,11 +8,14 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
-import javax.xml.parsers.DocumentBuilderFactory;
+
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
@@ -25,9 +28,11 @@ import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
 import org.apache.http.util.EntityUtils;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.w3c.dom.NodeList;
+
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
@@ -39,8 +44,14 @@ enum ErrorCodes {
 
 public class DataDownloader extends AsyncTask<String, Void, ErrorCodes> {
 	WeatherMonitorActivity parent;
-	String xml;
-	XMLParser parser;
+	String response;
+
+	String tempUnit;
+	String location;
+	NodeList nl;
+	Bitmap[] bitmaps = new Bitmap[5];
+	JSONArray weatherDataArray;
+	JSONObject whetherDataObject;
 	final String REQUEST_ITEM = "request";
 	final String LOCATION_ITEM = "query";
 	final String KEY_ITEM = "weather"; // parent node
@@ -50,27 +61,21 @@ public class DataDownloader extends AsyncTask<String, Void, ErrorCodes> {
 	final String KEY_MINTEMPC = "tempMinC";
 	final String KEY_MAXTEMPC = "tempMaxC";
 	final String KEY_ICON = "weatherIconUrl";
-	String tempUnit;
-	String location;
-	NodeList nl;
-	Bitmap[] bitmaps = new Bitmap[3];
+	final String DEGREE = "\u00b0";
 
 	ErrorCodes error;
 
 	public DataDownloader(WeatherMonitorActivity WeatherMonitorActivity) {
 		// TODO Auto-generated constructor stub
 		parent = WeatherMonitorActivity;
-		parser = new XMLParser();
 	}
 
 	@Override
 	protected ErrorCodes doInBackground(String... params) {
 		error = ErrorCodes.NOERROR;
 		String loc = params[0];
-		tempUnit = params[1];
-		String xml = null;
 		try {
-			xml = makeRequest(loc);
+			response = makeRequest(loc);
 		} catch (URISyntaxException e) {
 			// possibly pc is wrong
 			e.printStackTrace();
@@ -85,29 +90,31 @@ public class DataDownloader extends AsyncTask<String, Void, ErrorCodes> {
 			return ErrorCodes.CONNECTIONERROR;
 		}
 
-		// Configure it to coalesce CDATA nodes
-		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-		factory.setCoalescing(true);
-		Document doc = parser.getDomElement(xml.toString());
+		try {
+			whetherDataObject = new JSONObject(response);
+			weatherDataArray = whetherDataObject.getJSONObject("data")
+					.getJSONArray("weather");
+			;
 
-		// get the city details
-		nl = doc.getElementsByTagName(REQUEST_ITEM);
-		if (nl.getLength() == 0) {
-			return ErrorCodes.POSTCODEERROR;
-		}
-		Element requestElement = (Element) nl.item(0);
-		location = parser.getValue(requestElement, LOCATION_ITEM);
-
-		nl = doc.getElementsByTagName(KEY_ITEM);
-
-		if (nl.getLength() == 0) {
-			return ErrorCodes.POSTCODEERROR;
+			location = whetherDataObject.getJSONObject("data")
+					.getJSONArray("request").getJSONObject(0)
+					.getString("query");
+		} catch (JSONException e2) {
+			// TODO Auto-generated catch block
+			e2.printStackTrace();
 		}
 
-		for (int i = 0; i < nl.getLength(); i++) {
-			Element e = (Element) nl.item(i);
+		for (int i = 0; i < weatherDataArray.length(); i++) {
 
-			String icon = parser.getValue(e, KEY_ICON);
+			String icon = null;
+			try {
+				icon = weatherDataArray.getJSONObject(0)
+						.getJSONArray("weatherIconUrl").getJSONObject(0)
+						.getString("value");
+			} catch (JSONException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 			URL url = null;
 			try {
 				url = new URL(icon);
@@ -137,15 +144,15 @@ public class DataDownloader extends AsyncTask<String, Void, ErrorCodes> {
 			ClientProtocolException, IOException {
 
 		List<NameValuePair> qparams = new ArrayList<NameValuePair>();
-		qparams.add(new BasicNameValuePair("key", "6ffa3d38e9115055122204"));
+		qparams.add(new BasicNameValuePair("key", "kp4wbe8jcnuzfc4bfj36p8fs"));
 		qparams.add(new BasicNameValuePair("q", loc));
-		qparams.add(new BasicNameValuePair("num_of_days", "3"));
-		qparams.add(new BasicNameValuePair("format", "xml"));
+		qparams.add(new BasicNameValuePair("num_of_days", "5"));
+		qparams.add(new BasicNameValuePair("format", "json"));
 		URI uri = null;
 
-		uri = URIUtils.createURI("http", "free.worldweatheronline.com", -1,
-				"/feed/weather.ashx", URLEncodedUtils.format(qparams, "UTF-8"),
-				null);
+		uri = URIUtils.createURI("http", "api.worldweatheronline.com", -1,
+				"/free/v1/weather.ashx",
+				URLEncodedUtils.format(qparams, "UTF-8"), null);
 
 		// return XML
 		DefaultHttpClient httpClient = new DefaultHttpClient();
@@ -205,57 +212,67 @@ public class DataDownloader extends AsyncTask<String, Void, ErrorCodes> {
 	@Override
 	protected void onPostExecute(ErrorCodes result) {
 		if (result != ErrorCodes.NOERROR) {
-			parent.showError(result);
+			// parent.showError(result);
 			return;
 		}
 
 		super.onPostExecute(result);
 		parent.textViewLocation.setText(location);
-		updateTemps(tempUnit);
+		try {
+			updateData();
+		} catch (JSONException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
-	public void updateTemps(String unit) {
-		// update unit, depends on unit
-		if (unit == "cent") {
-			for (int i = 0; i < nl.getLength(); i++) {
-				Element e = (Element) nl.item(i);
+	public void updateData() throws JSONException {
 
-				parent.textViewDateArray[i].setText(GetDayOfWeek(parser
-						.getValue(e, KEY_DATE)));
+		// find out what temperature unit to extract
+		String unit = parent.prefs.getString("prefTemperatureUnit",
+				"Centigrade");
 
-				parent.textViewDayHighArray[i].setText(parser.getValue(e,
-						KEY_MAXTEMPC) + "°C");
-				parent.textViewDayLowArray[i].setText(parser.getValue(e,
-						KEY_MINTEMPC) + "°C");
+		String degrees = null;
+		
+		parent.adapter.clear();
 
-				parent.imageViewArray[i].setImageBitmap(bitmaps[i]);
+		if (unit.equals("Centigrade")) {
+
+			degrees = DEGREE + "C";
+			for (int i = 0; i < weatherDataArray.length(); i++) {
+				JSONObject e = weatherDataArray.getJSONObject(i);
+
+				WeatherData weatherData = new WeatherData(
+						GetDayOfWeek(e.getString(KEY_DATE)), bitmaps[i],
+						e.getString(KEY_MINTEMPC) + degrees,
+						e.getString(KEY_MAXTEMPC) + degrees);
+				parent.adapter.add(weatherData);
 			}
-
 		} else {
-			for (int i = 0; i < nl.getLength(); i++) {
-				Element e = (Element) nl.item(i);
 
-				parent.textViewDateArray[i].setText(GetDayOfWeek(parser
-						.getValue(e, KEY_DATE)));
+			degrees = DEGREE + "F";
+			for (int i = 0; i < weatherDataArray.length(); i++) {
+				JSONObject e = weatherDataArray.getJSONObject(i);
 
-				parent.textViewDayHighArray[i].setText(parser.getValue(e,
-						KEY_MAXTEMPF) + "°F");
-				parent.textViewDayLowArray[i].setText(parser.getValue(e,
-						KEY_MINTEMPF) + "°F");
-
-				parent.imageViewArray[i].setImageBitmap(bitmaps[i]);
+				WeatherData weatherData = new WeatherData(
+						GetDayOfWeek(e.getString(KEY_DATE)), bitmaps[i],
+						e.getString(KEY_MINTEMPF) + degrees,
+						e.getString(KEY_MAXTEMPF) + degrees);
+				parent.adapter.add(weatherData);
 			}
+
 		}
 
-	}
+		// update last refresh and button
+		String lastRefresh = "Updated: ";
+		lastRefresh += DateFormat.getDateInstance().format(new Date());
+		DateFormat dateFormat = new SimpleDateFormat("HH:mm a");
+		lastRefresh += " " + dateFormat.format(new Date());
+		parent.textViewLastRefresh.setText(lastRefresh);
 
-	protected String parseXML(String xml) {
-		parser.getDomElement(xml);
-		return "";
-	}
+		parent.buttonRefresh.setText(R.string.refresh);
+		parent.buttonRefresh.setClickable(true);
 
-	public XMLParser parser() {
-		return parser;
 	}
 
 }
