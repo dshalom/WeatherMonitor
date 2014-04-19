@@ -1,21 +1,25 @@
 package com.dshalom.weathermonitor;
 
-import com.crashlytics.android.Crashlytics;
 import java.util.ArrayList;
-import com.dshalom.weathermonitor.DataDownloader;
+
+import android.app.ActionBar;
 import android.app.ListActivity;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MenuItem.OnMenuItemClickListener;
 import android.view.View;
-import android.view.Window;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.crashlytics.android.Crashlytics;
 
 public class WeatherMonitorActivity extends ListActivity implements OnSharedPreferenceChangeListener {
 
@@ -30,13 +34,21 @@ public class WeatherMonitorActivity extends ListActivity implements OnSharedPref
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		Crashlytics.start(this);
-		this.requestWindowFeature(Window.FEATURE_NO_TITLE);
 		weatherDataList = new ArrayList<WeatherData>();
 
 		adapter = new WeatherAdapter(this, R.layout.row, weatherDataList);
 
 		View header = (View) getLayoutInflater().inflate(
 				R.layout.headerrow, null);
+		
+		ActionBar actionBar = getActionBar();
+		actionBar.setBackgroundDrawable(new ColorDrawable(Color.BLUE)); 
+		//actionBar.setBackgroundDrawable(R.drawable.header_look);
+		
+		//actionBar.setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM); 
+	//	actionBar.setDisplayShowCustomEnabled(true);
+	//	actionBar.setDisplayShowTitleEnabled(false);
+	//	actionBar.setCustomView(R.layout.ab);
 
 		getListView().addHeaderView(header);
 		getListView().setBackgroundResource(R.drawable.seagulls);
@@ -62,6 +74,7 @@ public class WeatherMonitorActivity extends ListActivity implements OnSharedPref
 		buttonRefresh = (Button) findViewById(R.id.buttonRefresh);
 		buttonRefresh.setText(R.string.refreshing);
 		buttonRefresh.setClickable(false);
+
 
 		// make the request
 		doWeatherUpdate();
@@ -111,8 +124,17 @@ public class WeatherMonitorActivity extends ListActivity implements OnSharedPref
 
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
-		startActivity(new Intent(this, PrefsActivity.class));
-		return true;
+
+		
+		 switch (item.getItemId()) 
+		   {
+		     case R.id.itemPrefs:
+		        Intent intent = new Intent(this, PrefsActivity.class);
+		        startActivity(intent);
+		        return true;
+		     default:
+		        return super.onOptionsItemSelected(item);
+		   }
 	}
 
 	public void onSharedPreferenceChanged(SharedPreferences arg0, String key) {
