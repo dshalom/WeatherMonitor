@@ -10,7 +10,7 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
-import com.dshalom.weathermonitor3.R;
+import com.dshalom.weathermonitor2.R;
 
 public class WeatherAdapter extends ArrayAdapter<WeatherData> {
 

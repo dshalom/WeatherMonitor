@@ -1,15 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
+    android:layout_height="fill_parent"
     android:clickable="false"
-    android:orientation="horizontal" >
+    android:orientation="horizontal" >
+
     <TextView
         android:id="@+id/textViewLastRefresh"
         android:layout_width="match_parent"
-        android:layout_height="33dp"
-        android:paddingLeft="6dp"
+        android:layout_height="fill_parent"
         android:clickable="false"
-        android:textAppearance="?android:attr/textAppearanceMedium" android:hapticFeedbackEnabled="false" android:gravity="center_vertical"/>
+        android:gravity="center_vertical"
+        android:hapticFeedbackEnabled="false"
+        android:paddingLeft="6dp"
+        android:textAppearance="?android:attr/textAppearanceMedium" />
 
 </LinearLayout>

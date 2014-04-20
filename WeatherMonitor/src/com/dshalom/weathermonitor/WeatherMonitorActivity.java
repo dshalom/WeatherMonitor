@@ -22,7 +22,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
-import com.dshalom.weathermonitor3.R;
+import com.dshalom.weathermonitor2.R;
 import com.littlefluffytoys.littlefluffylocationlibrary.LocationInfo;
 import com.littlefluffytoys.littlefluffylocationlibrary.LocationLibrary;
 
@@ -56,7 +56,7 @@ public class WeatherMonitorActivity extends ListActivity implements
 
 		ActionBar actionBar = getActionBar();
 		actionBar.setBackgroundDrawable(new ColorDrawable(Color.BLUE));
-
+		
 		getListView().addHeaderView(header);
 		getListView().setBackgroundResource(R.drawable.seagulls);
 

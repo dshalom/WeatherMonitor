@@ -36,7 +36,7 @@ import org.w3c.dom.NodeList;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
-import com.dshalom.weathermonitor3.R;
+import com.dshalom.weathermonitor2.R;
 
 
 enum ErrorCodes {

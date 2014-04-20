@@ -1,10 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.dshalom.weathermonitor3"
-    android:versionCode="4"
-    android:versionName="1.11" >
+    package="com.dshalom.weathermonitor2"
+    android:versionCode="7"
+    android:versionName="2.0" >
 
-    <uses-sdk android:minSdkVersion="11" />
+    <uses-sdk
+        android:minSdkVersion="11"
+        android:targetSdkVersion="19" />
+    
+    <permission
+    android:name="com.dshalom.weathermonitor3.MY_PERMISSION"
+    android:protectionLevel="normal" />
 
     <uses-permission android:name="android.permission.INTERNET" >
     </uses-permission>
@@ -21,7 +27,8 @@
 
     <application
         android:icon="@drawable/launcher"
-        android:label="@string/app_name" >
+        android:label="@string/app_name" 
+        android:allowBackup="true">
         <activity
             android:name="com.dshalom.weathermonitor.WeatherMonitorActivity"
             android:label="@string/app_name"
@@ -47,14 +54,15 @@
             </intent-filter>
         </receiver>
         <receiver
+            android:permission="com.dshalom.weathermonitor3.MY_PERMISSION"
             android:name="com.littlefluffytoys.littlefluffylocationlibrary.PassiveLocationChangedReceiver"
             android:exported="true" />
-    
+
         <meta-data
             android:name="com.google.android.gms.version"
             android:value="@integer/google_play_services_version" />
         
-          <meta-data android:name="com.crashlytics.ApiKey" android:value="4f858c25987a47327eeb6eb1015886706369f135"/>
+         <meta-data android:name="com.crashlytics.ApiKey" android:value="4f858c25987a47327eeb6eb1015886706369f135"/>
         
     </application>
 
