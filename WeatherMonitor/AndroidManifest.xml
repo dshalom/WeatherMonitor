@@ -8,6 +8,16 @@
 
     <uses-permission android:name="android.permission.INTERNET" >
     </uses-permission>
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+
+    <uses-feature
+        android:name="android.hardware.location"
+        android:required="true" />
+    <uses-feature
+        android:name="android.hardware.location.gps"
+        android:required="false" />
 
     <application
         android:icon="@drawable/launcher"
@@ -27,10 +37,26 @@
             android:label="Configuration" >
         </activity>
 
+        <meta-data
+            android:name="com.crashlytics.ApiKey"
+            android:value="4f858c25987a47327eeb6eb1015886706369f135" />
 
-    
+        <service android:name="com.littlefluffytoys.littlefluffylocationlibrary.LocationBroadcastService" />
 
-    <meta-data android:name="com.crashlytics.ApiKey" android:value="4f858c25987a47327eeb6eb1015886706369f135"/>
+        <receiver
+            android:name="com.littlefluffytoys.littlefluffylocationlibrary.StartupBroadcastReceiver"
+            android:exported="true" >
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+            </intent-filter>
+        </receiver>
+        <receiver
+            android:name="com.littlefluffytoys.littlefluffylocationlibrary.PassiveLocationChangedReceiver"
+            android:exported="true" />
+    
+        <meta-data
+            android:name="com.google.android.gms.version"
+            android:value="@integer/google_play_services_version" />
     </application>
 
 </manifest>

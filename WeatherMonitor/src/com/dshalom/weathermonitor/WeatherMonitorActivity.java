@@ -4,26 +4,34 @@ import java.util.ArrayList;
 
 import android.app.ActionBar;
 import android.app.ListActivity;
+import android.app.NotificationManager;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.MenuItem.OnMenuItemClickListener;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.crashlytics.android.Crashlytics;
+import com.littlefluffytoys.littlefluffylocationlibrary.LocationInfo;
+import com.littlefluffytoys.littlefluffylocationlibrary.LocationLibrary;
+import com.littlefluffytoys.littlefluffylocationlibrary.LocationLibraryConstants;
 
-public class WeatherMonitorActivity extends ListActivity implements OnSharedPreferenceChangeListener {
+public class WeatherMonitorActivity extends ListActivity implements
+		OnSharedPreferenceChangeListener {
 
-	TextView textViewLocation,textViewLastRefresh;
+	TextView textViewLocation, textViewLastRefresh;
 	ArrayList<WeatherData> weatherDataList;
 	long lastUpdate;
 	SharedPreferences prefs;
@@ -38,17 +46,11 @@ public class WeatherMonitorActivity extends ListActivity implements OnSharedPref
 
 		adapter = new WeatherAdapter(this, R.layout.row, weatherDataList);
 
-		View header = (View) getLayoutInflater().inflate(
-				R.layout.headerrow, null);
-		
+		View header = (View) getLayoutInflater().inflate(R.layout.headerrow,
+				null);
+
 		ActionBar actionBar = getActionBar();
-		actionBar.setBackgroundDrawable(new ColorDrawable(Color.BLUE)); 
-		//actionBar.setBackgroundDrawable(R.drawable.header_look);
-		
-		//actionBar.setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM); 
-	//	actionBar.setDisplayShowCustomEnabled(true);
-	//	actionBar.setDisplayShowTitleEnabled(false);
-	//	actionBar.setCustomView(R.layout.ab);
+		actionBar.setBackgroundDrawable(new ColorDrawable(Color.BLUE));
 
 		getListView().addHeaderView(header);
 		getListView().setBackgroundResource(R.drawable.seagulls);
@@ -64,31 +66,46 @@ public class WeatherMonitorActivity extends ListActivity implements OnSharedPref
 		getListView().setClickable(false);
 
 		setListAdapter(adapter);
-		
+
 		prefs = PreferenceManager.getDefaultSharedPreferences(this);
 		prefs.registerOnSharedPreferenceChangeListener(this);
 
 		textViewLocation = (TextView) findViewById(R.id.txtHeaderLocation);
 		textViewLastRefresh = (TextView) findViewById(R.id.textViewLastRefresh);
-		
+
 		buttonRefresh = (Button) findViewById(R.id.buttonRefresh);
 		buttonRefresh.setText(R.string.refreshing);
 		buttonRefresh.setClickable(false);
 
+		LocationLibrary.initialiseLibrary(getBaseContext(), false,
+				"com.dshalom.weathermonitor");
 
-		// make the request
 		doWeatherUpdate();
+
 	}
 
 	public void onGoClick(View v) {
 		doWeatherUpdate();
 	}
-	
-	private void doWeatherUpdate()
-	{
-		DataDownloader dataDownloader = new DataDownloader(this);		
-		String location = prefs.getString("prefLocation", "London");
-		dataDownloader.execute(new String[] { location });		
+
+	private void doWeatherUpdate() {
+
+		// make the request
+
+		if (prefs.getBoolean("prefCurrentLocation", false)) {
+			LocationInfo latestInfo = new LocationInfo(getBaseContext());
+
+			DataDownloader dataDownloader = new DataDownloader(this);
+			String location = latestInfo.lastLat + " " + latestInfo.lastLong;
+
+			dataDownloader.execute(new String[] { location });
+
+		} else {
+			DataDownloader dataDownloader = new DataDownloader(this);
+			String location = prefs.getString("prefLocation", "London");
+			dataDownloader.execute(new String[] { location });
+		}
+
 	}
 
 	public void showError(ErrorCodes result) {
@@ -98,22 +115,21 @@ public class WeatherMonitorActivity extends ListActivity implements OnSharedPref
 			toast = Toast.makeText(getBaseContext(),
 					"Error, please check internet connection!",
 					Toast.LENGTH_SHORT);
-			//update widgets
+			// update widgets
 			textViewLastRefresh.setText(R.string.connectionError);
 			buttonRefresh.setText(R.string.refresh);
 			buttonRefresh.setClickable(true);
-			
+
 		} else if (result == ErrorCodes.POSTCODEERROR) {
 			toast = Toast.makeText(getBaseContext(),
 					"Error, please check location!", Toast.LENGTH_SHORT);
-			//update widgets
+			// update widgets
 			textViewLastRefresh.setText(R.string.locationError);
 			buttonRefresh.setText(R.string.refresh);
 			buttonRefresh.setClickable(true);
 		}
 		toast.show();
 	}
-
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
@@ -125,21 +141,19 @@ public class WeatherMonitorActivity extends ListActivity implements OnSharedPref
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 
-		
-		 switch (item.getItemId()) 
-		   {
-		     case R.id.itemPrefs:
-		        Intent intent = new Intent(this, PrefsActivity.class);
-		        startActivity(intent);
-		        return true;
-		     default:
-		        return super.onOptionsItemSelected(item);
-		   }
+		switch (item.getItemId()) {
+		case R.id.itemPrefs:
+			Intent intent = new Intent(this, PrefsActivity.class);
+			startActivity(intent);
+			return true;
+		default:
+			return super.onOptionsItemSelected(item);
+		}
 	}
 
 	public void onSharedPreferenceChanged(SharedPreferences arg0, String key) {
 		doWeatherUpdate();
-		
+
 	}
 
 }

@@ -1,17 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
-    <EditTextPreference android:key="prefLocation" android:title="@string/location" 
-        android:summary="@string/locationSummary"/>
-    <ListPreference android:key="prefTemperatureUnit" 
-        android:entryValues="@array/stringArrayTemeratureValues" 
-        android:title="@string/temperatureUnit" 
-        android:entries="@array/stringArrayTemeratureUnits" 
-        android:summary="Centigrade or Fahrenheit" 
-        android:defaultValue="@string/centigrade"
-        
-       />
-    
 
-    
+    <EditTextPreference
+        android:key="prefLocation"
+        android:summary="@string/locationSummary"
+        android:title="@string/location" />
+
+    <ListPreference
+        android:defaultValue="@string/centigrade"
+        android:entries="@array/stringArrayTemeratureUnits"
+        android:entryValues="@array/stringArrayTemeratureValues"
+        android:key="prefTemperatureUnit"
+        android:summary="Centigrade or Fahrenheit"
+        android:title="@string/temperatureUnit" />
+
+    <CheckBoxPreference
+        android:key="prefCurrentLocation"
+        android:title="Use my current location" />
 
 </PreferenceScreen>
