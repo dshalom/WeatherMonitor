@@ -1,32 +1,29 @@
 package com.dshalom.weathermonitor;
 
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
 
 import android.app.ActionBar;
 import android.app.ListActivity;
-import android.app.NotificationManager;
-import android.content.BroadcastReceiver;
-import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
+import android.location.Address;
+import android.location.Geocoder;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
-
-import com.crashlytics.android.Crashlytics;
 import com.littlefluffytoys.littlefluffylocationlibrary.LocationInfo;
 import com.littlefluffytoys.littlefluffylocationlibrary.LocationLibrary;
-import com.littlefluffytoys.littlefluffylocationlibrary.LocationLibraryConstants;
 
 public class WeatherMonitorActivity extends ListActivity implements
 		OnSharedPreferenceChangeListener {
@@ -37,11 +34,13 @@ public class WeatherMonitorActivity extends ListActivity implements
 	SharedPreferences prefs;
 	WeatherAdapter adapter;
 	Button buttonRefresh;
+	
+
+
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		Crashlytics.start(this);
 		weatherDataList = new ArrayList<WeatherData>();
 
 		adapter = new WeatherAdapter(this, R.layout.row, weatherDataList);
@@ -90,22 +89,48 @@ public class WeatherMonitorActivity extends ListActivity implements
 
 	private void doWeatherUpdate() {
 
-		// make the request
-
+		
 		if (prefs.getBoolean("prefCurrentLocation", false)) {
 			LocationInfo latestInfo = new LocationInfo(getBaseContext());
 
+			Geocoder geocoder;
+			List<Address> addresses = null;
+			geocoder = new Geocoder(this, Locale.getDefault());
+			try {
+				addresses = geocoder.getFromLocation(latestInfo.lastLat,
+						latestInfo.lastLong, 1);
+				String city = addresses.get(0).getAddressLine(1);
+				textViewLocation.setText(city);
+
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+				textViewLocation.setText(latestInfo.lastLat + " "
+						+ latestInfo.lastLong);
+			}
+
 			DataDownloader dataDownloader = new DataDownloader(this);
 			String location = latestInfo.lastLat + " " + latestInfo.lastLong;
-
 			dataDownloader.execute(new String[] { location });
 
 		} else {
 			DataDownloader dataDownloader = new DataDownloader(this);
 			String location = prefs.getString("prefLocation", "London");
+			textViewLocation.setText(location);
 			dataDownloader.execute(new String[] { location });
 		}
 
+	}
+	
+	public void updateLocation(String location){
+		
+		if (prefs.getBoolean("prefCurrentLocation", false)){
+			return;
+			
+		}
+		else{
+			textViewLocation.setText(location);
+		}
 	}
 
 	public void showError(ErrorCodes result) {

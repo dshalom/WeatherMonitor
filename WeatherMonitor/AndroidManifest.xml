@@ -37,10 +37,6 @@
             android:label="Configuration" >
         </activity>
 
-        <meta-data
-            android:name="com.crashlytics.ApiKey"
-            android:value="4f858c25987a47327eeb6eb1015886706369f135" />
-
         <service android:name="com.littlefluffytoys.littlefluffylocationlibrary.LocationBroadcastService" />
 
         <receiver

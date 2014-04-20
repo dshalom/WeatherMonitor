@@ -217,7 +217,7 @@ public class DataDownloader extends AsyncTask<String, Void, ErrorCodes> {
 		}
 
 		super.onPostExecute(result);
-		parent.textViewLocation.setText(location);
+		parent.updateLocation(location);
 		try {
 			updateData();
 		} catch (JSONException e) {
