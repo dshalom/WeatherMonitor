@@ -4,6 +4,7 @@ package com.dshalom.weathermonitor;
 
 import android.os.Bundle;
 import android.preference.PreferenceActivity;
+
 import com.dshalom.weathermonitor2.R;
 
 public class PrefsActivity extends PreferenceActivity {

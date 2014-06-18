@@ -22,11 +22,11 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.crashlytics.android.Crashlytics;
 import com.dshalom.weathermonitor2.R;
 import com.littlefluffytoys.littlefluffylocationlibrary.LocationInfo;
 import com.littlefluffytoys.littlefluffylocationlibrary.LocationLibrary;
-
-import com.crashlytics.android.Crashlytics;
 
 public class WeatherMonitorActivity extends ListActivity implements
 		OnSharedPreferenceChangeListener {
@@ -114,6 +114,12 @@ public class WeatherMonitorActivity extends ListActivity implements
 				textViewLocation.setText(latestInfo.lastLat + " "
 						+ latestInfo.lastLong);
 			}
+			
+			catch (IllegalArgumentException e){
+				e.printStackTrace();
+				showError(ErrorCodes.POSTCODEERROR);
+				
+			}
 
 			DataDownloader dataDownloader = new DataDownloader(this);
 			String location = latestInfo.lastLat + " " + latestInfo.lastLong;
@@ -160,6 +166,12 @@ public class WeatherMonitorActivity extends ListActivity implements
 			buttonRefresh.setClickable(true);
 		}
 		toast.show();
+		
+		//clear the list
+		weatherDataList.clear();
+		adapter.notifyDataSetChanged();
+		
+		
 	}
 
 	@Override

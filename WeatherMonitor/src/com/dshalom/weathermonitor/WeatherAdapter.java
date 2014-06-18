@@ -2,6 +2,7 @@ package com.dshalom.weathermonitor;
 
 import java.util.ArrayList;
 import java.util.List;
+
 import android.app.Activity;
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -10,6 +11,7 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
+
 import com.dshalom.weathermonitor2.R;
 
 public class WeatherAdapter extends ArrayAdapter<WeatherData> {

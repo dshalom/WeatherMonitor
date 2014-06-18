@@ -33,11 +33,11 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.w3c.dom.NodeList;
 
+import com.dshalom.weathermonitor2.R;
+
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
-import com.dshalom.weathermonitor2.R;
-
 
 enum ErrorCodes {
 	NOERROR, POSTCODEERROR, CONNECTIONERROR, OTHERERROR
@@ -95,48 +95,50 @@ public class DataDownloader extends AsyncTask<String, Void, ErrorCodes> {
 			whetherDataObject = new JSONObject(response);
 			weatherDataArray = whetherDataObject.getJSONObject("data")
 					.getJSONArray("weather");
-			;
+		
 
 			location = whetherDataObject.getJSONObject("data")
 					.getJSONArray("request").getJSONObject(0)
 					.getString("query");
+
+			for (int i = 0; i < weatherDataArray.length(); i++) {
+
+				String icon = null;
+				try {
+					icon = weatherDataArray.getJSONObject(0)
+							.getJSONArray("weatherIconUrl").getJSONObject(0)
+							.getString("value");
+				} catch (JSONException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				URL url = null;
+				try {
+					url = new URL(icon);
+				} catch (MalformedURLException e1) {
+					e1.printStackTrace();
+					return ErrorCodes.OTHERERROR;
+				}
+				URLConnection connection = null;
+				InputStream is = null;
+				try {
+					connection = url.openConnection();
+					connection.connect();
+					is = connection.getInputStream();
+					BufferedInputStream bis = new BufferedInputStream(is);
+					bitmaps[i] = BitmapFactory.decodeStream(bis);
+					bis.close();
+					is.close();
+				} catch (IOException e1) {
+					e1.printStackTrace();
+					return ErrorCodes.CONNECTIONERROR;
+				}
+			}
+
 		} catch (JSONException e2) {
 			// TODO Auto-generated catch block
 			e2.printStackTrace();
-		}
-
-		for (int i = 0; i < weatherDataArray.length(); i++) {
-
-			String icon = null;
-			try {
-				icon = weatherDataArray.getJSONObject(0)
-						.getJSONArray("weatherIconUrl").getJSONObject(0)
-						.getString("value");
-			} catch (JSONException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			URL url = null;
-			try {
-				url = new URL(icon);
-			} catch (MalformedURLException e1) {
-				e1.printStackTrace();
-				return ErrorCodes.OTHERERROR;
-			}
-			URLConnection connection = null;
-			InputStream is = null;
-			try {
-				connection = url.openConnection();
-				connection.connect();
-				is = connection.getInputStream();
-				BufferedInputStream bis = new BufferedInputStream(is);
-				bitmaps[i] = BitmapFactory.decodeStream(bis);
-				bis.close();
-				is.close();
-			} catch (IOException e1) {
-				e1.printStackTrace();
-				return ErrorCodes.CONNECTIONERROR;
-			}
+			error = ErrorCodes.POSTCODEERROR;
 		}
 		return error;
 	}
@@ -213,7 +215,7 @@ public class DataDownloader extends AsyncTask<String, Void, ErrorCodes> {
 	@Override
 	protected void onPostExecute(ErrorCodes result) {
 		if (result != ErrorCodes.NOERROR) {
-			// parent.showError(result);
+			parent.showError(result);
 			return;
 		}
 
@@ -234,7 +236,7 @@ public class DataDownloader extends AsyncTask<String, Void, ErrorCodes> {
 				"Centigrade");
 
 		String degrees = null;
-		
+
 		parent.adapter.clear();
 
 		if (unit.equals("Centigrade")) {
